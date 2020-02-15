@@ -1,7 +1,6 @@
 <template xmlns:>
-
   <div id="app" :class="[$options.name]">
-    <b-navbar toggleable="md" type="dark" variant="dark">
+    <b-navbar toggleable="lg" type="dark" variant="dark">
 
       <a class="navbar-brand" href="#">
         <img src="./assets/logo.png" alt="" width="40px" height="80px">
@@ -32,208 +31,320 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
+    <nav >
+      <div class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+        <a class="nav-item btn btn-info rounded-0  active" id="nav-1-tab" data-toggle="tab" href="#nav-1" role="tab" aria-controls="nav-1" aria-selected="true">Kejadian</a>
+        <a class="nav-item btn btn-info rounded-0 " id="nav-2-tab" data-toggle="tab" href="#nav-2" role="tab" aria-controls="nav-2" aria-selected="false">Kegiatan</a>
+        <a class="nav-item btn btn-info rounded-0 " id="nav-3-tab" data-toggle="tab" href="#nav-3" role="tab" aria-controls="nav-3" aria-selected="false">Sebaran Kekuatan</a>
+        <a class="nav-item btn btn-info rounded-0 " id="nav-4-tab" data-toggle="tab" href="#nav-4" role="tab" aria-controls="nav-4" aria-selected="false">Rawan Bencana</a>
+        <a class="nav-item btn btn-info rounded-0 " id="nav-5-tab" data-toggle="tab" href="#nav-5" role="tab" aria-controls="nav-5" aria-selected="false">Perbatasan</a>
+      </div>
+    </nav>
+    <b-card>
+      <b-form inline>
+        <b-form-group
+          label-cols-sm="5"
+          label-cols-lg="3"
+          label="From:"
+          label-for="input-date-from">
+          <b-form-input type="date" id="input-date-from"></b-form-input>
+        </b-form-group>
+
+        <b-form-group
+          label-cols-sm="5"
+          label-cols-lg="3"
+          label="To:"
+          label-for="input-date-to">
+          <b-form-input type="date" id="input-date-to"></b-form-input>
+        </b-form-group>
+
+        <b-form-group
+          label-cols-sm="10"
+          label-cols-lg="11"
+          label="Rating"
+          label-for="radio-rating">
+          <b-form-radio-group
+            id="radio-rating"
+            name="rating-options"
+          >
+              <b-form-radio size="sm" value="all">All</b-form-radio>
+              <b-form-radio size="sm" value="u10">u10</b-form-radio>
+              <b-form-radio size="sm" value="10-20">10-20</b-form-radio>
+              <b-form-radio size="sm" value="20-40">20-40</b-form-radio>
+              <b-form-radio size="sm" value="40-60">40-60</b-form-radio>
+              <b-form-radio size="sm" value="60-80">60-80</b-form-radio>
+              <b-form-radio size="sm" value="80-100">80-100</b-form-radio>
+          </b-form-radio-group>
+
+        </b-form-group>
+
+        <b-form-group
+          label-cols-sm="6"
+          label-cols-lg="5"
+          label="Province"
+          label-for="select-province">
+          <b-form-select
+            id="select-province"
+            name="province-options"
+          >
+            <b-form-select-option  size="lg" value="Aceh">Aceh</b-form-select-option>
+            <b-form-select-option  size="lg" value="Sumatra Utara">Sumatra Utara</b-form-select-option>
+            <b-form-select-option  size="lg" value="Sumatra Barat">Sumatra Barat</b-form-select-option>
+            <b-form-select-option  size="lg" value="Jakarta">Jakarta</b-form-select-option>
+            <b-form-select-option  size="lg" value="Jawa Barat">Jawa Barat</b-form-select-option>
+            <b-form-select-option  size="lg" value="Jawa Tengah">Jawa Tengah</b-form-select-option>
+            <b-form-select-option  size="lg" value="Jawa Timur">Bandung</b-form-select-option>
+            <b-form-select-option  size="lg" value="Bali">Bali</b-form-select-option>
+          </b-form-select>
+        </b-form-group>
+
+        <b-button style="margin-top:35px;" type="submit" variant="primary">Submit</b-button>
+      </b-form>
+    </b-card>
+
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="nav-1" role="tabpanel" aria-labelledby="nav-1-tab">
+        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+                @postcompose="onMapPostCompose"
+                data-projection="EPSG:4326" @mounted="onMapMounted">
+          <!-- map view aka ol.View -->
+          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
 
 
-    <div class="d-flex bd-highlight my-6 ml-5">
-      <b-button squared class="btn-default ml-2 mr-3">Filter</b-button>
-      <b-button squared v-b-toggle.collapse-1 class="btn-danger ml-1">Tanggal</b-button>
-      <b-button squared v-b-toggle.collapse-2 class="btn-danger ml-1">Rating</b-button>
-      <b-button squared v-b-toggle.collapse-3 class="btn-danger ml-1">Wilayah</b-button>
-    </div>
-    <!-- Element to collapse -->
-    <b-collapse id="collapse-1" role="tabpanel"  accordion="my-accordion">
-      <b-card>
-        <b-form inline>
-            <b-col md="1">
-              <label :for="input-date-from">From:</label>
-            </b-col>
-            <b-col md="1">
-              <b-form-input type="date" id="input-date-from"></b-form-input>
-            </b-col>
-            <b-col md="1">
-              <label :for="input-date-to">To:</label>
-            </b-col>
-            <b-col md="2">
-              <b-form-input type="date" id="input-date-to"></b-form-input>
-            </b-col>
-            <b-col md="1">
-              <b-button type="submit" variant="primary">Submit</b-button>
-            </b-col>
-        </b-form>
-      </b-card>
-    </b-collapse>
-    <!-- <b-collapse id="collapse-2" role="tabpanel"  accordion="my-accordion">
-      <b-card>
-        <b-form inline>
-            <b-form-group label="Category Event">
-              <b-form-radio-group
-                id="category-event"
-                name="category-event-options"
-              >
-                  <b-form-radio value="all">All</b-form-radio>
-                  <b-form-radio value="kegiatan">Kegiatan</b-form-radio>
-                  <b-form-radio value="antisipasi">Antisipasi</b-form-radio>
 
-                <b-button type="submit" variant="primary">Submit</b-button>
-              </b-form-radio-group>
-
-            </b-form-group>
-        </b-form>
-      </b-card>
-    </b-collapse> -->
-    <b-collapse id="collapse-2" role="tabpanel"  accordion="my-accordion">
-      <b-card>
-        <b-form inline>
-            <b-form-group label="Rating">
-              <b-form-radio-group
-                id="rating"
-                name="rating-options"
-              >
-                  <b-form-radio value="all">All</b-form-radio>
-                  <b-form-radio value="u-10">u-10</b-form-radio>
-                  <b-form-radio value="10-20">10-20</b-form-radio>
-                  <b-form-radio value="20-40">20-40</b-form-radio>
-                  <b-form-radio value="40-60">40-60</b-form-radio>
-                  <b-form-radio value="60-80">60-80</b-form-radio>
-                  <b-form-radio value="80-100">80-100</b-form-radio>
-                <b-button type="submit" variant="primary">Submit</b-button>
-              </b-form-radio-group>
-            </b-form-group>
-        </b-form>
-      </b-card>
-    </b-collapse>
-    <b-collapse id="collapse-3" role="tabpanel"  accordion="my-accordion">
-      <b-card>
-        <b-form inline>
-            <b-form-group label="province">
-              <b-form-select
-                id="province"
-                name="province-options"
-              >
-                <template v-slot:first>
-                  <b-form-select-option :value="null" disabled>-- Please select an option --</b-form-select-option>
+          <!-- interactions -->
+          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
+            <template slot-scope="select">
+              <!-- selected feature popup -->
+              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
+                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
+                <template>
+                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
+                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                  </b-card>
                 </template>
-                <b-form-select-option value="Aceh">Aceh</b-form-select-option>
-                <b-form-select-option value="Sumatra Utara">Sumatra Utara</b-form-select-option>
-                <b-form-select-option value="Sumatra Barat">Sumatra Barat</b-form-select-option>
-                <b-form-select-option value="Jakarta">Jakarta</b-form-select-option>
-                <b-form-select-option value="Jawa Barat">Jawa Barat</b-form-select-option>
-                <b-form-select-option value="Jawa Tengah">Jawa Tengah</b-form-select-option>
-                <b-form-select-option value="Jawa Timur">Bandung</b-form-select-option>
-                <b-form-select-option value="Bali">Bali</b-form-select-option>
-              </b-form-select>
-              <b-button type="submit" variant="primary">Submit</b-button>
-            </b-form-group>
-        </b-form>
-      </b-card>
-    </b-collapse>
+              </vl-overlay>
+              <!--// selected popup -->
+            </template>
+          </vl-interaction-select>
+          <!--// interactions -->
 
-    <div class="fixed-top-right d-flex bd-highlight my-10">
-      <b-button squared class="mr-auto my-10 btn-arrow-right btn-info">Kejadian</b-button>
+          <vl-layer-tile>
+            <vl-source-osm></vl-source-osm>
+          </vl-layer-tile>
+
+
+          <vl-layer-vector>
+            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
+            <vl-style-func :factory="styleFuncProp" />
+          </vl-layer-vector>
+
+        </vl-map>
+      </div>
+      <div class="tab-pane fade" id="nav-2" role="tabpanel" aria-labelledby="nav-2-tab">
+        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+                @postcompose="onMapPostCompose"
+                data-projection="EPSG:4326" @mounted="onMapMounted">
+          <!-- map view aka ol.View -->
+          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
+
+
+
+          <!-- interactions -->
+          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
+            <template slot-scope="select">
+              <!-- selected feature popup -->
+              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
+                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
+                <template>
+                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
+                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                  </b-card>
+                </template>
+              </vl-overlay>
+              <!--// selected popup -->
+            </template>
+          </vl-interaction-select>
+          <!--// interactions -->
+
+          <vl-layer-tile>
+            <vl-source-osm></vl-source-osm>
+          </vl-layer-tile>
+
+
+          <vl-layer-vector>
+            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
+            <vl-style-func :factory="styleFuncProp" />
+          </vl-layer-vector>
+
+        </vl-map>
+      </div>
+      <div class="tab-pane fade" id="nav-3" role="tabpanel" aria-labelledby="nav-3-tab">
+        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+                @postcompose="onMapPostCompose"
+                data-projection="EPSG:4326" @mounted="onMapMounted">
+          <!-- map view aka ol.View -->
+          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
+
+
+
+          <!-- interactions -->
+          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
+            <template slot-scope="select">
+              <!-- selected feature popup -->
+              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
+                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
+                <template>
+                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
+                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                  </b-card>
+                </template>
+              </vl-overlay>
+              <!--// selected popup -->
+            </template>
+          </vl-interaction-select>
+          <!--// interactions -->
+
+          <vl-layer-tile>
+            <vl-source-osm></vl-source-osm>
+          </vl-layer-tile>
+
+
+          <vl-layer-vector>
+            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
+            <vl-style-func :factory="styleFuncProp" />
+          </vl-layer-vector>
+
+        </vl-map>
+      </div>
+      <div class="tab-pane fade" id="nav-4" role="tabpanel" aria-labelledby="nav-4-tab">
+        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+                @postcompose="onMapPostCompose"
+                data-projection="EPSG:4326" @mounted="onMapMounted">
+          <!-- map view aka ol.View -->
+          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
+
+
+
+          <!-- interactions -->
+          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
+            <template slot-scope="select">
+              <!-- selected feature popup -->
+              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
+                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
+                <template>
+                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
+                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                  </b-card>
+                </template>
+              </vl-overlay>
+              <!--// selected popup -->
+            </template>
+          </vl-interaction-select>
+          <!--// interactions -->
+
+          <vl-layer-tile>
+            <vl-source-osm></vl-source-osm>
+          </vl-layer-tile>
+
+
+          <vl-layer-vector>
+            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
+            <vl-style-func :factory="styleFuncProp" />
+          </vl-layer-vector>
+
+        </vl-map>
+      </div>
+      <div class="tab-pane fade" id="nav-5" role="tabpanel" aria-labelledby="nav-5-tab">
+        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+                @postcompose="onMapPostCompose"
+                data-projection="EPSG:4326" @mounted="onMapMounted">
+          <!-- map view aka ol.View -->
+          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
+
+
+
+          <!-- interactions -->
+          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
+            <template slot-scope="select">
+              <!-- selected feature popup -->
+              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
+                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
+                <template>
+                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
+                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                  </b-card>
+                </template>
+              </vl-overlay>
+              <!--// selected popup -->
+            </template>
+          </vl-interaction-select>
+          <!--// interactions -->
+
+          <vl-layer-tile>
+            <vl-source-osm></vl-source-osm>
+          </vl-layer-tile>
+
+
+          <vl-layer-vector>
+            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
+            <vl-style-func :factory="styleFuncProp" />
+          </vl-layer-vector>
+
+        </vl-map>
+      </div>
     </div>
 
-    <div class="fixed-top-right d-flex bd-highlight my-11">
-      <b-button squared class="mr-auto my-11 btn-arrow-right btn-success">Kegiatan</b-button>
-    </div>
-
-    <div class="fixed-top-right d-flex bd-highlight my-12">
-      <b-button squared class="mr-auto my-12 btn-arrow-right btn-warning">Sebaran Kekuatan</b-button>
-    </div>
-
-
-    <div class="fixed-top-left d-flex bd-highlight my-8">
+    <div class="fixed-top-left d-flex bd-highlight my-10">
       <b-button v-b-toggle.collapse-6 squared class="ml-auto btn-arrow-left btn-primary">List Data</b-button>
     </div>
 
-    <div class="fixed-top ml-auto d-flex bd-highlight my-9 p-1 w-25">
+    <div class="fixed-top ml-auto d-flex bd-highlight my-11 p-1 w-25">
       <b-collapse id="collapse-6">
-            <b-card right-align class="ml-auto">
-              <ul class="list-unstyled">
-                <b-media tag="li">
-                  <template v-slot:aside>
-                    <b-img blank blank-color="#abc" width="64" alt="placeholder"></b-img>
-                  </template>
-                  <h5 class="mt-0 mb-1">List-based media object</h5>
-                  <p class="mb-0">
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                    Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                    ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                  </p>
-                </b-media>
+        <b-card right-align class="overflow-auto ml-auto" style="max-height:420px">
+          <ul class="list-unstyled">
+            <b-media tag="li">
+              <template v-slot:aside>
+                <b-img blank blank-color="#abc" width="64" alt="placeholder"></b-img>
+              </template>
+              <h5 class="mt-0 mb-1">List-based media object</h5>
+              <p class="mb-0">
+                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
+                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
+                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+              </p>
+            </b-media>
 
-                <b-media tag="li" class="my-4">
-                  <template v-slot:aside>
-                  <b-img blank blank-color="#cba" width="64" alt="placeholder"></b-img>
-                  </template>
+            <b-media tag="li" class="my-4">
+              <template v-slot:aside>
+              <b-img blank blank-color="#cba" width="64" alt="placeholder"></b-img>
+              </template>
 
-                  <h5 class="mt-0 mb-1">List-based media object</h5>
-                  <p class="mb-0">
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                    Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                    ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                  </p>
-                </b-media>
+              <h5 class="mt-0 mb-1">List-based media object</h5>
+              <p class="mb-0">
+                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
+                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
+                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+              </p>
+            </b-media>
 
-                <b-media tag="li">
-                  <template v-slot:aside>
-                    <b-img blank blank-color="#bac" width="64" alt="placeholder"></b-img>
-                  </template>
+            <b-media tag="li">
+              <template v-slot:aside>
+                <b-img blank blank-color="#bac" width="64" alt="placeholder"></b-img>
+              </template>
 
-                  <h5 class="mt-0 mb-1">List-based media object</h5>
-                  <p class="mb-0">
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                    Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                    ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                  </p>
-                </b-media>
+              <h5 class="mt-0 mb-1">List-based media object</h5>
+              <p class="mb-0">
+                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
+                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
+                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+              </p>
+            </b-media>
 
-              </ul>
-            </b-card>
+          </ul>
+        </b-card>
       </b-collapse>
     </div>
-
-    <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-            @postcompose="onMapPostCompose"
-            data-projection="EPSG:4326" @mounted="onMapMounted">
-      <!-- map view aka ol.View -->
-      <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
-
-
-
-      <!-- interactions -->
-      <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
-        <template slot-scope="select">
-          <!-- selected feature popup -->
-          <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
-                      :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-            <template>
-              <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
-              </b-card>
-            </template>
-          </vl-overlay>
-          <!--// selected popup -->
-        </template>
-      </vl-interaction-select>
-      <!--// interactions -->
-
-      <vl-layer-tile>
-        <vl-source-osm></vl-source-osm>
-      </vl-layer-tile>
-
-
-      <vl-layer-vector>
-        <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
-        <vl-style-func :factory="styleFuncProp" />
-      </vl-layer-vector>
-
-      <!-- <vl-layer-vector>
-        <vl-source-vector url="https://raw.githubusercontent.com/rifani/geojson-political-indonesia/master/IDN_adm_2_kabkota.json"></vl-source-vector>
-        <vl-style-func :factory="styleFuncKab" />
-      </vl-layer-vector> -->
-
-
-    </vl-map>
     <!--// app map -->
 
 
@@ -257,7 +368,6 @@
   // add to the list of known projections
   // after that it can be used by code
   addProj(customProj)
-
   // const easeInOut = t => 1 - Math.pow(1 - t, 3)
   const methods = {
     camelCase,
@@ -325,6 +435,9 @@
         }
       }
     },
+    tabsClick () {
+
+    },
   }
 
   export default {
@@ -333,7 +446,7 @@
     data () {
       return {
         center: [115.90631268750555, -1.8963730925758129],
-        zoom: 6,
+        zoom: 5,
         rotation: 0,
         selectedFeatures: [],
         panelOpen: true,
@@ -358,6 +471,10 @@
 </script>
 
 <style scoped>
+
+  .card-body {
+    padding: 0.4rem;
+  }
   .my-6 {
     top: 5rem !important;
   }
@@ -366,11 +483,9 @@
     top: 9rem !important;
   }
 
-
   .my-8 {
     top: 11rem !important;
   }
-
 
   .my-9 {
     top: 14rem !important;
@@ -381,11 +496,15 @@
   }
 
   .my-11 {
-    top: 18rem !important;
+    top: 19rem !important;
   }
 
   .my-12 {
-    top: 20rem !important;
+    top: 22rem !important;
+  }
+
+  .my-13 {
+    top: 25rem !important;
   }
 
   .btn-arrow-right,
