@@ -1,35 +1,5 @@
 <template xmlns:>
   <div id="app" :class="[$options.name]">
-    <b-navbar toggleable="lg" type="dark" variant="dark">
-
-      <a class="navbar-brand" href="#">
-        <img src="../assets/logo.png" alt="" width="40px" height="80px">
-        <b-navbar-brand href="#"> Dashboard</b-navbar-brand>
-      </a>
-      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-
-      <b-collapse id="nav-collapse" is-nav>
-        <b-navbar-nav class="ml-auto">
-          <b-nav-item-dropdown text="Menu" right>
-            <b-dropdown-item href="#">Configuration</b-dropdown-item>
-            <b-dropdown-item href="#">Member</b-dropdown-item>
-            <b-dropdown-item href="#">Organization Structure</b-dropdown-item>
-            <b-dropdown-item href="#">Troops</b-dropdown-item>
-            <b-dropdown-item href="#">Comment</b-dropdown-item>
-            <b-dropdown-item href="#">User</b-dropdown-item>
-          </b-nav-item-dropdown>
-
-
-          <b-button size="sm" class="my-2 my-sm-0" disabled>Administrator</b-button>
-          <b-button size="sm" class="my-2 my-sm-0 ml-2">
-            <a class="nav-link" href @click.prevent="logOut">
-              <font-awesome-icon icon="sign-out-alt" />Logout
-            </a>
-          </b-button>
-
-        </b-navbar-nav>
-      </b-collapse>
-    </b-navbar>
     <nav >
       <div class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
         <a class="nav-item btn btn-info rounded-0  active" id="nav-1-tab" data-toggle="tab" href="#nav-1" role="tab" aria-controls="nav-1" aria-selected="true">Kejadian</a>
@@ -140,7 +110,8 @@
                           :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
                 <template>
                   <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                    <b-table :items="items" :fields="fields">
+                    </b-table>
                   </b-card>
                 </template>
               </vl-overlay>
@@ -177,7 +148,8 @@
                           :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
                 <template>
                   <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                    <b-table :items="items" :fields="fields">
+                    </b-table>
                   </b-card>
                 </template>
               </vl-overlay>
@@ -215,7 +187,8 @@
                           :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
                 <template>
                   <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                    <b-table :items="items" :fields="fields">
+                    </b-table>
                   </b-card>
                 </template>
               </vl-overlay>
@@ -253,7 +226,8 @@
                           :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
                 <template>
                   <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                    <b-table :items="items" :fields="fields">
+                    </b-table>
                   </b-card>
                 </template>
               </vl-overlay>
@@ -291,7 +265,8 @@
                           :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
                 <template>
                   <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+                    <b-table :items="items" :fields="fields">
+                    </b-table>
                   </b-card>
                 </template>
               </vl-overlay>
@@ -313,90 +288,7 @@
         </vl-map>
       </div>
     </div>
-
-    <div class="fixed-top-left d-flex bd-highlight my-10">
-      <b-button v-b-toggle.collapse-6 squared class="ml-auto btn-arrow-left btn-primary">List Data</b-button>
-    </div>
-
-    <div class="fixed-top ml-auto d-flex bd-highlight my-11 p-1 w-25">
-      <b-collapse id="collapse-6">
-        <b-card right-align class="overflow-auto ml-auto" style="max-height:420px">
-          <b-card no-body class="overflow-hidden  mb-3" style="max-width: 540px;">
-            <b-row no-gutters>
-              <b-col md="6">
-                <b-card-img src="https://picsum.photos/400/400/?image=20" class="rounded-0"></b-card-img>
-              </b-col>
-              <b-col md="6">
-                <b-card-body title="Horizontal Card">
-                  <b-card-text>
-                    This is a wider card with supporting text as a natural lead-in to additional content.
-                    This content is a little bit longer.
-                  </b-card-text>
-                </b-card-body>
-              </b-col>
-            </b-row>
-          </b-card>
-          <b-card no-body class="overflow-hidden mb-3" style="max-width: 540px;">
-            <b-row no-gutters>
-              <b-col md="6">
-                <b-card-img src="https://picsum.photos/400/400/?image=20" class="rounded-0"></b-card-img>
-              </b-col>
-              <b-col md="6">
-                <b-card-body title="Horizontal Card">
-                  <b-card-text>
-                    This is a wider card with supporting text as a natural lead-in to additional content.
-                    This content is a little bit longer.
-                  </b-card-text>
-                </b-card-body>
-              </b-col>
-            </b-row>
-          </b-card>
-          <!-- <ul class="list-unstyled">
-            <b-media tag="li">
-              <template v-slot:aside>
-                <b-img blank blank-color="#abc" width="64" alt="placeholder"></b-img>
-              </template>
-              <h5 class="mt-0 mb-1">List-based media object</h5>
-              <p class="mb-0">
-                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-              </p>
-            </b-media>
-
-            <b-media tag="li" class="my-4">
-              <template v-slot:aside>
-              <b-img blank blank-color="#cba" width="64" alt="placeholder"></b-img>
-              </template>
-
-              <h5 class="mt-0 mb-1">List-based media object</h5>
-              <p class="mb-0">
-                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-              </p>
-            </b-media>
-
-            <b-media tag="li">
-              <template v-slot:aside>
-                <b-img blank blank-color="#bac" width="64" alt="placeholder"></b-img>
-              </template>
-
-              <h5 class="mt-0 mb-1">List-based media object</h5>
-              <p class="mb-0">
-                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-              </p>
-            </b-media>
-
-          </ul> -->
-        </b-card>
-      </b-collapse>
-    </div>
     <!--// app map -->
-
-
   </div>
 </template>
 
@@ -512,18 +404,24 @@
         panelOpen: true,
         mapVisible: true,
         drawType: undefined,
-        options: {
-          chart: {
-            id: 'vuechart-example',
-          },
-          xaxis: {
-            categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998],
-          },
-        },
-        series: [{
-          name: 'series-1',
-          data: [30, 40, 45, 50, 49, 60, 70, 91],
-        }],
+        fields: ['Nama', 'Tipe', 'Rating'],
+        items: [
+          { Tipe: 1, Nama: 'Dickerson', Rating: 5 },
+          { Tipe: 1, Nama: 'Larsen', Rating: 4 },
+          { Tipe: 1, Nama: 'Geneva', Rating: 3 },
+        ],
+        // options: {
+        //   chart: {
+        //     id: 'vuechart-example',
+        //   },
+        //   xaxis: {
+        //     categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998],
+        //   },
+        // },
+        // series: [{
+        //   name: 'series-1',
+        //   data: [30, 40, 45, 50, 49, 60, 70, 91],
+        // }],
         // features: null,
       }
     },

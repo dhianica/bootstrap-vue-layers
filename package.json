@@ -16,7 +16,6 @@
     "bnd": "cross-env BASE_PATH=/demo npm run build && npm run deploy"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.0.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.27",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/vue-fontawesome": "^0.1.9",
@@ -26,9 +25,10 @@
     "bootstrap-vue": "^2.4.0",
     "buefy": "^0.8.10",
     "bulma": "^0.7.5",
-    "core-js": "^2.6.11",
+    "core-js": "^3.6.4",
     "jquery": "^3.4.1",
     "lodash": "^4.17.11",
+    "moment": "^2.24.0",
     "ol": "^5.3.1",
     "popper.js": "^1.16.1",
     "portal-vue": "^2.1.7",
@@ -36,6 +36,8 @@
     "vue": "^2.6.11",
     "vue-apexcharts": "^1.5.2",
     "vue-router": "^3.1.5",
+    "vue-tables-2": "^2.0.0",
+    "vuejs-dialog": "^1.4.1",
     "vuelayers": "^0.11.4",
     "vuex": "^3.1.2"
   },

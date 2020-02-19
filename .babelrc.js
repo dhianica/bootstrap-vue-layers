@@ -2,7 +2,17 @@ module.exports = function (api) {
   api.cache(true)
 
   const presets = [
-    ['@babel/preset-env', { modules: false, useBuiltIns: 'entry' }],
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "entry", // "usage" | "entry" | false, defaults to false.
+        "corejs": "3.0.0",
+        "targets": {
+          "esmodules": true,
+          "ie": "11"
+        }
+      }
+    ],
   ]
   const plugins = [
     // Stage 0

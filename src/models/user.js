@@ -1,12 +1,11 @@
 export default class User {
-  constructor (username, password, usernumber, userfullname, usernickname, usertype, orgstructureid, passwordsalt) {
-    this.usernumber = usernumber
-    this.userfullname = userfullname
-    this.usernickname = usernickname
-    this.usertype = usertype
-    this.orgstructureid = orgstructureid
+  constructor (username, password, userNumber, userFullname, userNickname, userType, orgStructureId) {
+    this.userNumber = userNumber
+    this.userFullname = userFullname
+    this.userNickname = userNickname
+    this.userType = userType
+    this.orgStructureId = orgStructureId
     this.username = username
     this.password = password
-    this.passwordsalt = passwordsalt
   }
 }

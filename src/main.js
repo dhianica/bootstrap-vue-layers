@@ -1,4 +1,3 @@
-import '@babel/polyfill'
 import Vue from 'vue'
 // import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
@@ -6,10 +5,11 @@ import 'buefy/dist/buefy.css'
 import VueLayers from 'vuelayers'
 // import VueLayers styles
 import 'vuelayers/lib/style.css'
+import 'vuejs-dialog/dist/vuejs-dialog.min.css'
 import App from './App.vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import { BootstrapVue } from 'bootstrap-vue'
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 import { router } from './router'
 import store from './store'
@@ -23,14 +23,18 @@ import {
   faSignInAlt,
   faSignOutAlt,
 } from '@fortawesome/free-solid-svg-icons'
+import { ClientTable } from 'vue-tables-2'
+import VuejsDialog from 'vuejs-dialog'
+
+Vue.use(ClientTable)
 
 library.add(faHome, faUser, faUserPlus, faSignInAlt, faSignOutAlt)
 
 Vue.config.productionTip = false
 
 Vue.use(VeeValidate)
+Vue.use(VuejsDialog)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
-
 Vue.use('buefy', {
   defaultIconPack: 'fa',
 })
@@ -41,6 +45,7 @@ Vue.use(VueLayers, {
   // dataProjection: 'EPSG:4326',
 })
 Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 
 Vue.component('apexchart', VueApexCharts)
 

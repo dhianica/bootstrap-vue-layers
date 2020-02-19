@@ -35,9 +35,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       // UglifyJs do not support ES6+, you can also use babel-minify for better treeshaking: https://github.com/babel/minify
       new UglifyJsPlugin({
         uglifyOptions: {
-          compress: {
-            warnings: false,
-          },
+          "warnings": false
         },
         cache: true,
         sourceMap: true,
