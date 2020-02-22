@@ -25,6 +25,16 @@
 import configService from '../../services/config.service'
 
 export default {
+  mounted () {
+    if (!this.currentUser) {
+      this.$router.push('/login')
+    }
+  },
+  computed: {
+    currentUser () {
+      return this.$store.state.auth.user
+    },
+  },
   data () {
     return {
       columns: ['id', 'config_name', 'config_type', 'config_description', 'res_1', 'res_2', 'res_3', 'res_4', 'res_5', 'createdAt', 'updatedAt', 'update', 'delete'],
@@ -63,7 +73,7 @@ export default {
   methods: {
     OnDelete (id, index) {
       this.$dialog.confirm('Apa anda yakin ingin menghapus data ini?').then(function (dialog) {
-        configService.deleteConfig(id).then(res => {
+        configService.delete(id).then(res => {
           window.location.reload()
         })
       })

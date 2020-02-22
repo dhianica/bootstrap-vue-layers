@@ -25,6 +25,16 @@
 import poiService from '../../services/poi.service'
 
 export default {
+  mounted () {
+    if (!this.currentUser) {
+      this.$router.push('/login')
+    }
+  },
+  computed: {
+    currentUser () {
+      return this.$store.state.auth.user
+    },
+  },
   data () {
     return {
       columns: ['id', 'poi_name', 'poi_address', 'poi_lon', 'poi_lat', 'poi_type', 'poi_description', 'createdAt', 'updatedAt', 'update', 'delete'],
@@ -61,7 +71,7 @@ export default {
   methods: {
     OnDelete (id, index) {
       this.$dialog.confirm('Apa anda yakin ingin menghapus data ini?').then(function (dialog) {
-        poiService.deletePoi(id).then(res => {
+        poiService.delete(id).then(res => {
           window.location.reload()
         })
       })

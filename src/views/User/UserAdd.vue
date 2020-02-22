@@ -1,84 +1,140 @@
 <template>
-  <div>
-    <b-form @submit="onSubmit" @reset="onReset" v-if="show">
-      <b-form-group
-        id="input-group-1"
-        label="Email address:"
-        label-for="input-1"
-        description="We'll never share your email with anyone else."
-      >
-        <b-form-input
-          id="input-1"
-          v-model="form.email"
-          type="email"
-          required
-          placeholder="Enter email"
-        ></b-form-input>
-      </b-form-group>
-
-      <b-form-group id="input-group-2" label="Your Name:" label-for="input-2">
-        <b-form-input
-          id="input-2"
-          v-model="form.name"
-          required
-          placeholder="Enter name"
-        ></b-form-input>
-      </b-form-group>
-
-      <b-form-group id="input-group-3" label="Food:" label-for="input-3">
-        <b-form-select
-          id="input-3"
-          v-model="form.food"
-          :options="foods"
-          required
-        ></b-form-select>
-      </b-form-group>
-
-      <b-form-group id="input-group-4">
-        <b-form-checkbox-group v-model="form.checked" id="checkboxes-4">
-          <b-form-checkbox value="me">Check me out</b-form-checkbox>
-          <b-form-checkbox value="that">Check that out</b-form-checkbox>
-        </b-form-checkbox-group>
-      </b-form-group>
-
-      <b-button type="submit" variant="primary">Submit</b-button>
-      <b-button type="reset" variant="danger">Reset</b-button>
-    </b-form>
-  </div>
+  <b-container class="bv-example-row p-3">
+    <b-row>
+      <b-col cols="12" md="12">
+        <b-breadcrumb :items="breadcumbsItems"></b-breadcrumb>
+        <b-form @submit="OnBtnSubmitClick" @submit.stop.prevent>
+          <b-form-group id="user-number-1" label="User Number:" label-for="user-number-1">
+            <b-form-input
+              id="user-number-1"
+              v-model="datas.user_number"
+              required
+              placeholder="Enter number"
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group id="user-fullname-1" label="User Fullname:" label-for="user-fullname-1">
+            <b-form-input
+              id="user-fullname-1"
+              v-model="datas.user_fullname"
+              required
+              placeholder="Enter fullname"
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group id="user-nickname-1" label="User Nickname:" label-for="user-nickname-1">
+            <b-form-input
+              id="user-nickname-1"
+              v-model="datas.user_nickname"
+              required
+              placeholder="Enter nickname"
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group id="user-type-1" label="Type:" label-for="user-type-1">
+            <b-form-select
+              id="user-type-1"
+              v-model="datas.user_type"
+              required
+            >
+              <option v-for="userType in selectItems.itemUserType" :key="userType.id" :value="userType.id">{{ userType.config_name }}</option>
+            </b-form-select>
+          </b-form-group>
+          <b-form-group id="user-name-1" label="Username:" label-for="user-name-1">
+            <b-form-input
+              id="user-name-1"
+              v-model="datas.username"
+              required
+              placeholder="Enter username"
+              autocomplete="off"
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group id="user-password-1" label="Password:" label-for="user-password-1">
+            <b-form-input
+              id="user-password-1"
+              required
+              placeholder="Enter password"
+              type="password"
+              v-model="datas.password"
+              autocomplete="off"
+            ></b-form-input>
+          </b-form-group>
+          <b-button type="submit" variant="primary">Submit</b-button>
+        </b-form>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        form: {
-          email: '',
-          name: '',
-          food: null,
-          checked: [],
+import userService from '../../services/user.service'
+import configService from '../../services/config.service'
+
+export default {
+  mounted () {
+    if (!this.currentUser) {
+      this.$router.push('/login')
+    }
+  },
+  computed: {
+    currentUser () {
+      return this.$store.state.auth.user
+    },
+  },
+  data () {
+    return {
+      datas: {
+        user_number: '',
+        user_fullname: '',
+        user_nickname: '',
+        user_type: '',
+        username: '',
+        password: '',
+      },
+      selectItems: {
+        itemUserType: [{ text: 'Select One', value: null }],
+      },
+      breadcumbsItems: [
+        {
+          text: 'Data',
+          href: '#',
         },
-        foods: [{ text: 'Select One', value: null }, 'Carrots', 'Beans', 'Tomatoes', 'Corn'],
-        show: true,
-      }
-    },
-    methods: {
-      onSubmit (evt) {
-        evt.preventDefault()
-        alert(JSON.stringify(this.form))
-      },
-      onReset (evt) {
-        evt.preventDefault()
-        // Reset our form values
-        this.form.email = ''
-        this.form.name = ''
-        this.form.food = null
-        this.form.checked = []
-        // Trick to reset/clear native browser form validation state
-        this.show = false
-        this.$nextTick(() => {
-          this.show = true
+        {
+          text: 'User',
+          to: '/user',
+        },
+        {
+          text: 'Add',
+          active: true,
+        },
+      ],
+    }
+  },
+  methods: {
+    OnBtnSubmitClick (evt) {
+      evt.preventDefault()
+      userService.add(this.datas).then(res => {
+        this.$bvToast.toast(`Berhasil menambah data`, {
+          title: 'Sukses',
+          toaster: 'b-toaster-top-right',
+          variant: 'success',
+          solid: true,
+          appendToast: true,
         })
-      },
+        this.$router.push('/user')
+      }).catch(error => {
+        this.$bvToast.toast(error.response.data.message.errors[0].message, {
+          title: 'Gagal menambah data',
+          toaster: 'b-toaster-top-right',
+          variant: 'danger',
+          solid: true,
+          appendToast: true,
+        })
+      })
     },
-  }
+  },
+  created () {
+    const conditiondConfig = '?config_type=kesatuan'
+    configService.getByCondition(conditiondConfig).then(res => {
+      this.selectItems.itemUserType = res.data
+    })
+  },
+}
 </script>

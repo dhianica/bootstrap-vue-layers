@@ -25,6 +25,16 @@
 import orgStructure from '../../services/orgstructure.service'
 
 export default {
+  mounted () {
+    if (!this.currentUser) {
+      this.$router.push('/login')
+    }
+  },
+  computed: {
+    currentUser () {
+      return this.$store.state.auth.user
+    },
+  },
   data () {
     return {
       columns: ['id', 'parent_id', 'org_structure_name', 'org_structure_description', 'map_id', 'res_1', 'res_2', 'res_3', 'res_4', 'res_5', 'createdAt', 'updatedAt', 'update', 'delete'],
@@ -64,7 +74,7 @@ export default {
   methods: {
     OnDelete (id, index) {
       this.$dialog.confirm('Apa anda yakin ingin menghapus data ini?').then(function (dialog) {
-        orgStructure.deleteOrgStucture(id).then(res => {
+        orgStructure.delete(id).then(res => {
           window.location.reload()
         })
       })

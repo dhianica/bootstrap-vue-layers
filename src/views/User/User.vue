@@ -3,14 +3,18 @@
     <b-row>
       <b-col cols="12" md="12">
         <b-breadcrumb :items="items"></b-breadcrumb>
+
+        <a  @click="OnBtnAddClick()">
+          <b-button variant="success" size="sm">Add<b-icon-plus></b-icon-plus></b-button>
+        </a>
         <v-client-table ref="table"
           v-model="tableData"
           :columns="columns"
           :options="options">
-          <a slot="update" slot-scope="props" :href="props.row.id">
+          <a slot="update" slot-scope="props"  @click="OnBtnUpdateClick(props.row.id)">
             <b-button variant="success" size="sm"><b-icon-pencil></b-icon-pencil></b-button>
           </a>
-          <a slot="delete" slot-scope="props" @click="OnDelete(props.row.id, props.index)">
+          <a slot="delete" slot-scope="props" @click="OnBtnDeleteClick(props.row.id)">
             <b-button variant="danger" size="sm">
               <b-icon-trash></b-icon-trash>
             </b-button>
@@ -25,6 +29,16 @@
 import userService from '../../services/user.service'
 
 export default {
+  mounted () {
+    if (!this.currentUser) {
+      this.$router.push('/login')
+    }
+  },
+  computed: {
+    currentUser () {
+      return this.$store.state.auth.user
+    },
+  },
   data () {
     return {
       columns: ['id', 'user_number', 'user_fullname', 'user_nickname', 'user_type', 'org_structure_id', 'username', 'createdAt', 'updatedAt', 'update', 'delete'],
@@ -59,18 +73,20 @@ export default {
     }
   },
   methods: {
-    OnDelete (id, index) {
+    OnBtnAddClick () {
+      this.$router.push({ name: 'useradd' })
+    },
+
+    OnBtnDeleteClick (id) {
       this.$dialog.confirm('Apa anda yakin ingin menghapus data ini?').then(function (dialog) {
-        userService.deleteUser(id).then(res => {
+        userService.delete(id).then(res => {
           window.location.reload()
         })
       })
     },
-  },
-  mounted () {
-    // userService.getAll().then(res => {
-    //   this.tableData = res.data
-    // })
+    OnBtnUpdateClick (id) {
+      this.$router.push({ name: 'userupdate', params: { id: id } })
+    },
   },
   created () {
     userService.getAll().then(res => {

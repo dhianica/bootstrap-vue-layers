@@ -2,7 +2,7 @@ import axios from 'axios'
 import authHeader from './auth-header'
 import url from '../config/url'
 
-const API_URL = url() + 'api/users/'
+const API_URL = url() + 'api/users'
 
 class UserService {
   getAll () {
@@ -10,33 +10,47 @@ class UserService {
   }
 
   getById (id) {
-    return axios.get(API_URL + id, { headers: authHeader() })
+    return axios.get(API_URL + '/' + id, { headers: authHeader() })
   }
 
-  addUser (user) {
-    return axios.post(API_URL, { headers: authHeader() }, {
-      user_number: user.userNumber,
-      user_fullname: user.userFullname,
-      user_nickname: user.userNickname,
-      user_type: user.userType,
-      org_structure_id: user.orgStructureId,
-      username: user.username,
-      password: user.password,
+  getByCondition (query) {
+    return axios.get(API_URL + query, { headers: authHeader() })
+  }
+
+  add (user) {
+    return axios({
+      method: 'post',
+      url: API_URL,
+      headers: authHeader(),
+      data: {
+        user_number: user.user_number,
+        user_fullname: user.user_fullname,
+        user_nickname: user.user_nickname,
+        user_type: user.user_type,
+        org_structure_id: user.org_structure_id,
+        username: user.username,
+        password: user.password,
+      },
     })
   }
-  updateUser (id, user) {
-    return axios.put(API_URL + id, { headers: authHeader() }, {
-      user_number: user.userNumber,
-      user_fullname: user.userFullname,
-      user_nickname: user.userNickname,
-      user_type: user.userType,
-      org_structure_id: user.orgStructureId,
-      username: user.username,
-      password: user.password,
+  update (id, user) {
+    return axios({
+      method: 'put',
+      url: API_URL + '/' + id,
+      headers: authHeader(),
+      data: {
+        user_number: user.user_number,
+        user_fullname: user.user_fullname,
+        user_nickname: user.user_nickname,
+        user_type: user.user_type,
+        // org_structure_id: user.org_structure_id,
+        username: user.username,
+        password: user.password,
+      },
     })
   }
-  deleteUser (id) {
-    return axios.delete(API_URL + id, { headers: authHeader() })
+  delete (id) {
+    return axios.delete(API_URL + '/' + id, { headers: authHeader() })
   }
 }
 

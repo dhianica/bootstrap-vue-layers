@@ -14,35 +14,26 @@
           <!-- <b-button v-b-toggle.collapse-6 size="sm" >List Data</b-button> -->
 
           <b-nav-item-dropdown text="Menu" right>
-            <b-dropdown-item>
-              <router-link to="/dashboard">
-                  Dashboard
-              </router-link>
+            <b-dropdown-item to="/dashboard">
+                Dashboard
             </b-dropdown-item>
-            <b-dropdown-item>
-              <router-link to="/config">
-                  Configuration
-              </router-link>
+            <b-dropdown-item to="/config">
+                Configuration
             </b-dropdown-item>
-            <b-dropdown-item>
-              <router-link to="/orgstructure">
-                  Organization Structure
-              </router-link>
+            <b-dropdown-item to="/orgstructure">
+                Organization Structure
             </b-dropdown-item>
-            <b-dropdown-item>
-              <router-link to="/poi">
-                  Poi
-              </router-link>
+            <b-dropdown-item to="/poi">
+                Poi
             </b-dropdown-item>
-            <b-dropdown-item>
-              <router-link to="/user">
-                  User
-              </router-link>
+            <b-dropdown-item to="/user">
+                User
             </b-dropdown-item>
           </b-nav-item-dropdown>
 
 
-          <b-button size="sm" class="my-2 my-sm-0" disabled>Administrator</b-button>
+          <b-nav-item size="sm" class="my-2 my-sm-0 ml-2"><b-icon-people-fill></b-icon-people-fill>{{ currentUser.accessToken.username }}
+          </b-nav-item>
           <b-button size="sm" class="my-2 my-sm-0 ml-2">
             <a class="nav-link" href @click.prevent="logOut">
               <font-awesome-icon icon="sign-out-alt" />Logout

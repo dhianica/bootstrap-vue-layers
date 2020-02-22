@@ -2,7 +2,7 @@ import axios from 'axios'
 import authHeader from './auth-header'
 import url from '../config/url'
 
-const API_URL = url() + 'api/pois/'
+const API_URL = url() + 'api/pois'
 
 class Poi {
   getAll () {
@@ -10,31 +10,45 @@ class Poi {
   }
 
   getById (id) {
-    return axios.get(API_URL + id, { headers: authHeader() })
+    return axios.get(API_URL + '/' + id, { headers: authHeader() })
   }
 
-  addPoi (poi) {
-    return axios.post(API_URL, { headers: authHeader() }, {
-      poi_name: poi.poiName,
-      poi_address: poi.poiAddress,
-      poi_lon: poi.poiLon,
-      poi_lat: poi.poiLat,
-      poi_type: poi.poiType,
-      poi_description: poi.poiDescription,
+  getByCondition (query) {
+    return axios.get(API_URL + query, { headers: authHeader() })
+  }
+
+  add (poi) {
+    return axios({
+      method: 'post',
+      url: API_URL,
+      headers: authHeader(),
+      data: {
+        poi_name: poi.poiName,
+        poi_address: poi.poiAddress,
+        poi_lon: poi.poiLon,
+        poi_lat: poi.poiLat,
+        poi_type: poi.poiType,
+        poi_description: poi.poiDescription,
+      },
     })
   }
-  updatePoi (id, poi) {
-    return axios.put(API_URL + id, { headers: authHeader() }, {
-      poi_name: poi.poiName,
-      poi_address: poi.poiAddress,
-      poi_lon: poi.poiLon,
-      poi_lat: poi.poiLat,
-      poi_type: poi.poiType,
-      poi_description: poi.poiDescription,
+  update (id, poi) {
+    return axios({
+      method: 'put',
+      url: API_URL + '/' + id,
+      headers: authHeader(),
+      data: {
+        poi_name: poi.poiName,
+        poi_address: poi.poiAddress,
+        poi_lon: poi.poiLon,
+        poi_lat: poi.poiLat,
+        poi_type: poi.poiType,
+        poi_description: poi.poiDescription,
+      },
     })
   }
-  deletePoi (id) {
-    return axios.delete(API_URL + id, { headers: authHeader() })
+  delete (id) {
+    return axios.delete(API_URL + '/' + id, { headers: authHeader() })
   }
 }
 
