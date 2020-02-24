@@ -1,14 +1,10 @@
-<template xmlns:>
-  <div id="app" :class="[$options.name]">
-    <nav >
-      <div class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
-        <a class="nav-item btn btn-info rounded-0  active" id="nav-1-tab" data-toggle="tab" href="#nav-1" role="tab" aria-controls="nav-1" aria-selected="true">Kejadian</a>
-        <a class="nav-item btn btn-info rounded-0 " id="nav-2-tab" data-toggle="tab" href="#nav-2" role="tab" aria-controls="nav-2" aria-selected="false">Kegiatan</a>
-        <a class="nav-item btn btn-info rounded-0 " id="nav-3-tab" data-toggle="tab" href="#nav-3" role="tab" aria-controls="nav-3" aria-selected="false">Sebaran Kekuatan</a>
-        <a class="nav-item btn btn-info rounded-0 " id="nav-4-tab" data-toggle="tab" href="#nav-4" role="tab" aria-controls="nav-4" aria-selected="false">Rawan Bencana</a>
-        <a class="nav-item btn btn-info rounded-0 " id="nav-5-tab" data-toggle="tab" href="#nav-5" role="tab" aria-controls="nav-5" aria-selected="false">Perbatasan</a>
-      </div>
-    </nav>
+<template>
+  <div>
+    <ul class="nav nav-tabs nav-justified nav-pills nav-fill">
+      <li class="nav-item" v-for="tabs in tabsItem" :key="tabs.id">
+        <a class="nav-link" @click.prevent="setActive('' + tabs.id + '')" :class="{ active: isActive('' + tabs.id + '') }" :href="'#' + tabs.id">{{ tabs.config_name }}</a>
+      </li>
+    </ul>
     <b-card>
       <b-form inline>
         <b-form-group
@@ -52,380 +48,253 @@
           label="Province"
           label-for="select-province">
           <b-form-select
-            id="select-province"
-            name="province-options"
-          >
-            <b-form-select-option  size="lg" value="All">All</b-form-select-option>
-            <b-form-select-option  size="lg" value="Aceh">Aceh</b-form-select-option>
-            <b-form-select-option  size="lg" value="Sumatra Utara">Sumatra Utara</b-form-select-option>
-            <b-form-select-option  size="lg" value="Sumatra Barat">Sumatra Barat</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jakarta">Jakarta</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jawa Barat">Jawa Barat</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jawa Tengah">Jawa Tengah</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jawa Timur">Bandung</b-form-select-option>
-            <b-form-select-option  size="lg" value="Bali">Bali</b-form-select-option>
-          </b-form-select>
+              @change="selectedProvince"
+              id="org-structure-1"
+              v-model="filters.org_structure"
+              required
+            >
+              <option v-for="OrgStructure in selectItems.itemsOrgStructure" :key="OrgStructure.id" :value="OrgStructure.id">{{ OrgStructure.org_structure_name }}</option>
+            </b-form-select>
         </b-form-group>
 
         <b-form-group
+          v-if="IscurrentProvince"
           label-cols-sm="6"
           label-cols-lg="5"
           label="Wilayah"
           label-for="select-wilayah">
           <b-form-select
-            id="select-wilayah"
-            name="wilayah-options"
-          >
-            <b-form-select-option  size="lg" value="All">All</b-form-select-option>
-            <b-form-select-option  size="lg" value="Aceh">Aceh</b-form-select-option>
-            <b-form-select-option  size="lg" value="Sumatra Utara">Sumatra Utara</b-form-select-option>
-            <b-form-select-option  size="lg" value="Sumatra Barat">Sumatra Barat</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jakarta">Jakarta</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jawa Barat">Jawa Barat</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jawa Tengah">Jawa Tengah</b-form-select-option>
-            <b-form-select-option  size="lg" value="Jawa Timur">Bandung</b-form-select-option>
-            <b-form-select-option  size="lg" value="Bali">Bali</b-form-select-option>
-          </b-form-select>
+              id="org-structure-detail-1"
+              v-model="filters.org_structure_detail"
+              required
+            >
+              <option v-for="OrgStructureDetail in selectItems.itemsOrgStructureDetail" :key="OrgStructureDetail.id" :value="OrgStructureDetail.id">{{ OrgStructureDetail.org_structure_name }}</option>
+            </b-form-select>
         </b-form-group>
 
         <b-button style="margin-top:35px;" type="submit" variant="primary">Submit</b-button>
       </b-form>
     </b-card>
 
-    <div class="tab-content" id="pills-tabContent">
-      <div class="tab-pane fade show active" id="nav-1" role="tabpanel" aria-labelledby="nav-1-tab">
-        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-                @postcompose="onMapPostCompose"
-                data-projection="EPSG:4326" @mounted="onMapMounted">
-          <!-- map view aka ol.View -->
-          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
 
+    <div class="tab-content py-3" id="myTabContent">
+      <div class="tab-pane fade" v-for="tabs in tabsItem" :key="tabs.id" :id="tabs.id" :class="{ 'active show': isActive('' + tabs.id + '') }">
+          <vl-map class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+                  @postcompose="onMapPostCompose"
+                  data-projection="EPSG:4326" @mounted="onMapMounted">
+            <!-- map view aka ol.View -->
+            <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
+            <!-- interactions -->
+            <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
+              <template slot-scope="select">
+                <!-- selected feature popup -->
+                <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
+                            :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
+                  <template>
+                    <b-card title="Data" :sub-title="feature.properties.Propinsi">
+                      <b-table :items="items" :fields="fieldsItem">
+                      </b-table>
+                    </b-card>
+                  </template>
+                </vl-overlay>
+                <!--// selected popup -->
+              </template>
+            </vl-interaction-select>
+            <!--// interactions -->
 
+            <vl-layer-tile>
+              <vl-source-osm></vl-source-osm>
+            </vl-layer-tile>
 
-          <!-- interactions -->
-          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
-            <template slot-scope="select">
-              <!-- selected feature popup -->
-              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
-                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-                <template>
-                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <b-table :items="items" :fields="fields">
-                    </b-table>
-                  </b-card>
-                </template>
-              </vl-overlay>
-              <!--// selected popup -->
-            </template>
-          </vl-interaction-select>
-          <!--// interactions -->
+            <vl-layer-vector>
+              <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
+              <vl-style-func :factory="styleFuncProp" />
+            </vl-layer-vector>
 
-          <vl-layer-tile>
-            <vl-source-osm></vl-source-osm>
-          </vl-layer-tile>
-
-          <vl-layer-vector>
-            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
-            <vl-style-func :factory="styleFuncProp" />
-          </vl-layer-vector>
-
-        </vl-map>
-      </div>
-      <div class="tab-pane fade" id="nav-2" role="tabpanel" aria-labelledby="nav-2-tab">
-        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-                @postcompose="onMapPostCompose"
-                data-projection="EPSG:4326" @mounted="onMapMounted">
-          <!-- map view aka ol.View -->
-          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
-
-
-
-          <!-- interactions -->
-          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
-            <template slot-scope="select">
-              <!-- selected feature popup -->
-              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
-                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-                <template>
-                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <b-table :items="items" :fields="fields">
-                    </b-table>
-                  </b-card>
-                </template>
-              </vl-overlay>
-              <!--// selected popup -->
-            </template>
-          </vl-interaction-select>
-          <!--// interactions -->
-
-          <vl-layer-tile>
-            <vl-source-osm></vl-source-osm>
-          </vl-layer-tile>
-
-
-          <vl-layer-vector>
-            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
-            <vl-style-func :factory="styleFuncProp" />
-          </vl-layer-vector>
-
-        </vl-map>
-      </div>
-      <div class="tab-pane fade" id="nav-3" role="tabpanel" aria-labelledby="nav-3-tab">
-        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-                @postcompose="onMapPostCompose"
-                data-projection="EPSG:4326" @mounted="onMapMounted">
-          <!-- map view aka ol.View -->
-          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
-
-
-
-          <!-- interactions -->
-          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
-            <template slot-scope="select">
-              <!-- selected feature popup -->
-              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
-                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-                <template>
-                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <b-table :items="items" :fields="fields">
-                    </b-table>
-                  </b-card>
-                </template>
-              </vl-overlay>
-              <!--// selected popup -->
-            </template>
-          </vl-interaction-select>
-          <!--// interactions -->
-
-          <vl-layer-tile>
-            <vl-source-osm></vl-source-osm>
-          </vl-layer-tile>
-
-
-          <vl-layer-vector>
-            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
-            <vl-style-func :factory="styleFuncProp" />
-          </vl-layer-vector>
-
-        </vl-map>
-      </div>
-      <div class="tab-pane fade" id="nav-4" role="tabpanel" aria-labelledby="nav-4-tab">
-        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-                @postcompose="onMapPostCompose"
-                data-projection="EPSG:4326" @mounted="onMapMounted">
-          <!-- map view aka ol.View -->
-          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
-
-
-
-          <!-- interactions -->
-          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
-            <template slot-scope="select">
-              <!-- selected feature popup -->
-              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
-                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-                <template>
-                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <b-table :items="items" :fields="fields">
-                    </b-table>
-                  </b-card>
-                </template>
-              </vl-overlay>
-              <!--// selected popup -->
-            </template>
-          </vl-interaction-select>
-          <!--// interactions -->
-
-          <vl-layer-tile>
-            <vl-source-osm></vl-source-osm>
-          </vl-layer-tile>
-
-
-          <vl-layer-vector>
-            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
-            <vl-style-func :factory="styleFuncProp" />
-          </vl-layer-vector>
-
-        </vl-map>
-      </div>
-      <div class="tab-pane fade" id="nav-5" role="tabpanel" aria-labelledby="nav-5-tab">
-        <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-                @postcompose="onMapPostCompose"
-                data-projection="EPSG:4326" @mounted="onMapMounted">
-          <!-- map view aka ol.View -->
-          <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
-
-
-
-          <!-- interactions -->
-          <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
-            <template slot-scope="select">
-              <!-- selected feature popup -->
-              <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
-                          :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-                <template>
-                  <b-card title="Chart" :sub-title="feature.properties.Propinsi">
-                    <b-table :items="items" :fields="fields">
-                    </b-table>
-                  </b-card>
-                </template>
-              </vl-overlay>
-              <!--// selected popup -->
-            </template>
-          </vl-interaction-select>
-          <!--// interactions -->
-
-          <vl-layer-tile>
-            <vl-source-osm></vl-source-osm>
-          </vl-layer-tile>
-
-
-          <vl-layer-vector>
-            <vl-source-vector url="https://raw.githubusercontent.com/ans-4175/peta-indonesia-geojson/97838545e3c047103ee74410f5ce048261c82f4d/indonesia-prov.geojson"></vl-source-vector>
-            <vl-style-func :factory="styleFuncProp" />
-          </vl-layer-vector>
-
-        </vl-map>
+          </vl-map>
       </div>
     </div>
-    <!--// app map -->
   </div>
 </template>
 
 <script>
-  import { kebabCase, camelCase } from 'lodash'
-  import { createProj, addProj, findPointOnSurface, createStyle } from 'vuelayers/lib/ol-ext'
-  import ScaleLine from 'ol/control/ScaleLine'
-  import OverviewMap from 'ol/control/OverviewMap'
-  import ZoomSlider from 'ol/control/ZoomSlider'
-  // const axios = require('axios')
+import { camelCase } from 'lodash'
+import { createProj, addProj, findPointOnSurface, createStyle } from 'vuelayers/lib/ol-ext'
+import ScaleLine from 'ol/control/ScaleLine'
+import OverviewMap from 'ol/control/OverviewMap'
+import ZoomSlider from 'ol/control/ZoomSlider'
+import orgStructureService from '../services/orgstructure.service'
+import configService from '../services/config.service'
 
-  let imageExtent = [10018754.172321, -1247452.3022878, 16280475.529441, 1257236.2405602]
-  let customProj = createProj({
-    code: 'xkcd-image',
-    units: 'pixels',
-    extent: imageExtent,
-  })
-  // add to the list of known projections
-  // after that it can be used by code
-  addProj(customProj)
-  // const easeInOut = t => 1 - Math.pow(1 - t, 3)
-  const methods = {
-    camelCase,
-    pointOnSurface: findPointOnSurface,
-    geometryTypeToCmpName (type) {
-      return 'vl-geom-' + kebabCase(type)
-    },
-    onMapPostCompose ({ vectorContext, frameState }) {
-      if (!this.$refs.marker || !this.$refs.marker.$feature) return
+let imageExtent = [10018754.172321, -1247452.3022878, 16280475.529441, 1257236.2405602]
+let customProj = createProj({
+  code: 'xkcd-image',
+  units: 'pixels',
+  extent: imageExtent,
+})
+addProj(customProj)
+const methods = {
+  camelCase,
+  pointOnSurface: findPointOnSurface,
+  onMapPostCompose ({ vectorContext, frameState }) {
+    if (!this.$refs.marker || !this.$refs.marker.$feature) return
 
-      const feature = this.$refs.marker.$feature
-      if (!feature.getGeometry() || !feature.getStyle()) return
-      this.$refs.map.render()
-    },
-    onMapMounted () {
-      // now ol.Map instance is ready and we can work with it directly
-      this.$refs.map.$map.getControls().extend([
-        new ScaleLine(),
-        new OverviewMap({
-          collapsed: false,
-          collapsible: true,
-        }),
-        new ZoomSlider(),
-      ])
-    },
-    styleFuncProp () {
-      const Colors = {}
-      Colors.names = {
-        darkgreen: '#006400',
-        darkolivegreen: '#556b2f',
-        darkorange: '#ff8c00',
-        green: '#008000',
-        maroon: '#800000',
-        orange: '#ffa500',
-        yellow: '#ffff00',
+    const feature = this.$refs.marker.$feature
+    if (!feature.getGeometry() || !feature.getStyle()) return
+
+    Object.keys(this.$refs).forEach(el => {
+      for (let index = 0; index < this.tabsItem.length; index++) {
+        this.$refs.map[index].render()
       }
-
-      Colors.random = function () {
-        var result
-        var count = 0
-        for (var prop in this.names) {
-          if (Math.random() < 1 / ++count) {
-            result = prop
-          }
-        }
-        return { name: result, rgb: this.names[result] }
+    })
+  },
+  onMapMounted () {
+    Object.keys(this.$refs).forEach(el => {
+      for (let index = 0; index < this.tabsItem.length; index++) {
+        this.$refs.map[index].$map.getControls().extend([
+          new ScaleLine(),
+          new OverviewMap({
+            collapsed: false,
+            collapsible: true,
+          }),
+          new ZoomSlider(),
+        ])
       }
+    })
+  },
+  styleFuncProp () {
+    const Colors = {}
+    Colors.names = {
+      darkgreen: '#006400',
+      darkolivegreen: '#556b2f',
+      darkorange: '#ff8c00',
+      green: '#008000',
+      maroon: '#800000',
+      orange: '#ffa500',
+      yellow: '#ffff00',
+    }
 
-      return (feature, resolution) => {
-        let isStyle = feature.getStyle()
-        let isStyleFunction = feature.getStyleFunction()
-        if (!isStyle && !isStyleFunction) {
-          let styles = [
-            createStyle({
-              // strokeColor: '#de9147',
-              strokeWidth: 0.8,
-              fillColor: Colors.random().rgb,
-              text: feature.getProperties().Propinsi,
-              font: '10px sans-serif',
-              scale: 2,
-            }),
-          ]
-          feature.setStyle(styles)
-          return styles
+    Colors.random = function () {
+      let result
+      let count = 0
+      for (let prop in this.names) {
+        if (Math.random() < 1 / ++count) {
+          result = prop
         }
       }
-    },
-    logOut () {
-      this.$store.dispatch('auth/logout')
+      return { name: result, rgb: this.names[result] }
+    }
+
+    return (feature, resolution) => {
+      const isStyle = feature.getStyle()
+      const isStyleFunction = feature.getStyleFunction()
+      if (!isStyle && !isStyleFunction) {
+        let styles = [
+          createStyle({
+            // strokeColor: '#de9147',
+            strokeWidth: 0.8,
+            fillColor: Colors.random().rgb,
+            text: feature.getProperties().Propinsi,
+            font: '10px sans-serif',
+            scale: 2,
+          }),
+        ]
+        feature.setStyle(styles)
+        return styles
+      }
+    }
+  },
+  selectedProvince () {
+    if (this.filters.org_structure === 0) {
+      this.IscurrentProvince = false
+    } else {
+      const conditionGetParentOrgStructure = '?parent_id=' + this.getCurrentOrgStructureId
+      orgStructureService.getByCondition(conditionGetParentOrgStructure).then(res => {
+        if (res.data.length < 1) {
+          this.IscurrentProvince = false
+        } else {
+          this.IscurrentProvince = true
+          const datas = []
+          res.data.forEach(element => {
+            datas.push({ id: element.id, org_structure_name: element.org_structure_name })
+          })
+          this.selectItems.itemsOrgStructureDetail = datas
+        }
+      })
+    }
+  },
+  isActive (menuItem) {
+    return this.activeItem === menuItem
+  },
+  setActive (menuItem) {
+    this.activeItem = menuItem
+  },
+}
+
+export default {
+  name: 'vl-dashboard-app',
+  methods,
+  mounted () {
+    if (!this.currentUser) {
       this.$router.push('/login')
+    }
+  },
+  computed: {
+    currentUser () {
+      return this.$store.state.auth.user
     },
-  }
-
-  export default {
-    name: 'vl-dashboard-app',
-    methods,
-    mounted () {
-      if (!this.currentUser) {
-        this.$router.push('/login')
-      }
+    getCurrentOrgStructureId () {
+      const user = JSON.parse(localStorage.getItem('user'))
+      return user.data.org_structure_id
     },
-    computed: {
-      currentUser () {
-        return this.$store.state.auth.user
+  },
+  data () {
+    return {
+      activeItem: '',
+      IscurrentProvince: false,
+      center: [115.90631268750555, -1.8963730925758129],
+      zoom: 5,
+      rotation: 0,
+      selectedFeatures: [],
+      panelOpen: true,
+      drawType: undefined,
+      fieldsItem: ['Nama', 'Tipe', 'Rating'],
+      items: [
+        { Tipe: 1, Nama: 'Dickerson', Rating: 5 },
+        { Tipe: 1, Nama: 'Larsen', Rating: 4 },
+        { Tipe: 1, Nama: 'Geneva', Rating: 3 },
+      ],
+      tabsItem: [],
+      selectItems: {
+        itemsOrgStructure: [],
+        itemsOrgStructureDetail: [],
       },
-    },
-    data () {
-      return {
-        center: [115.90631268750555, -1.8963730925758129],
-        zoom: 5,
-        rotation: 0,
-        selectedFeatures: [],
-        panelOpen: true,
-        mapVisible: true,
-        drawType: undefined,
-        fields: ['Nama', 'Tipe', 'Rating'],
-        items: [
-          { Tipe: 1, Nama: 'Dickerson', Rating: 5 },
-          { Tipe: 1, Nama: 'Larsen', Rating: 4 },
-          { Tipe: 1, Nama: 'Geneva', Rating: 3 },
-        ],
-        // options: {
-        //   chart: {
-        //     id: 'vuechart-example',
-        //   },
-        //   xaxis: {
-        //     categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998],
-        //   },
-        // },
-        // series: [{
-        //   name: 'series-1',
-        //   data: [30, 40, 45, 50, 49, 60, 70, 91],
-        // }],
-        // features: null,
-      }
-    },
-  }
+      filters: {
+        org_structure: '',
+      },
+    }
+  },
+  created () {
+    const conditionGetParentOrgStructure = '?id=' + this.getCurrentOrgStructureId
+    orgStructureService.getByCondition(conditionGetParentOrgStructure).then(res => {
+      const datas = [
+        {
+          id: 0,
+          org_structure_name: 'All',
+        },
+      ]
+      res.data.forEach(element => {
+        datas.push({ id: element.id, org_structure_name: element.org_structure_name })
+      })
+      this.selectItems.itemsOrgStructure = datas
+    })
+
+    const conditionGetMap = '?res_1=1'
+    configService.getByCondition(conditionGetMap).then(res => {
+      this.tabsItem = res.data
+    })
+  },
+}
 </script>
 
 <style scoped>

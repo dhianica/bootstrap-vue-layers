@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import App from './App.vue'
 // import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
 // import VueLayers modules
@@ -6,10 +7,9 @@ import VueLayers from 'vuelayers'
 // import VueLayers styles
 import 'vuelayers/lib/style.css'
 import 'vuejs-dialog/dist/vuejs-dialog.min.css'
-import App from './App.vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
+import { BootstrapVue, BootstrapVueIcons, BTabs } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 import { router } from './router'
 import store from './store'
@@ -26,6 +26,9 @@ import {
 import { ClientTable } from 'vue-tables-2'
 import VuejsDialog from 'vuejs-dialog'
 
+// register all VueLayers components
+Vue.use(VueLayers, {})
+
 Vue.use(ClientTable)
 
 library.add(faHome, faUser, faUserPlus, faSignInAlt, faSignOutAlt)
@@ -39,13 +42,9 @@ Vue.use('buefy', {
   defaultIconPack: 'fa',
 })
 
-// register all VueLayers components
-Vue.use(VueLayers, {
-  // global data projection, see https://vuelayers.github.io/#/quickstart?id=global-data-projection
-  // dataProjection: 'EPSG:4326',
-})
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
+Vue.component('b-tabs', BTabs)
 
 Vue.component('apexchart', VueApexCharts)
 

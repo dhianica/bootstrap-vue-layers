@@ -43,9 +43,9 @@ class UserService {
         user_fullname: user.user_fullname,
         user_nickname: user.user_nickname,
         user_type: user.user_type,
-        // org_structure_id: user.org_structure_id,
+        org_structure_id: user.org_structure_id,
         username: user.username,
-        password: user.password,
+        // password: user.password,
       },
     })
   }

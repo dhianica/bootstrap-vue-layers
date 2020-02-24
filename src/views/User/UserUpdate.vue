@@ -37,6 +37,20 @@
               <option v-for="userType in selectItems.itemUserType" :key="userType.id" :value="userType.id">{{ userType.config_name }}</option>
             </b-form-select>
           </b-form-group>
+          <b-form-group id="org-structure-id-1" label="Parent Organization Structure :" label-for="org-structure-id-1">
+            <treeselect
+              :options="selectItems.itemsOrgStructureId"
+              v-model="datas.org_structure_id"
+              :searchable="true"
+              :show-count="true"
+              :default-expand-level="1"
+              >
+              <label slot="option-label" slot-scope="{ node, shouldShowCount, count, labelClassName, countClassName }" :class="labelClassName">
+                {{ node.label }}
+                <span v-if="shouldShowCount" :class="countClassName">({{ count }})</span>
+              </label>
+            </treeselect>
+          </b-form-group>
           <b-form-group id="user-name-1" label="Username:" label-for="user-name-1">
             <b-form-input
               id="user-name-1"
@@ -45,7 +59,7 @@
               placeholder="Enter username"
             ></b-form-input>
           </b-form-group>
-          <b-form-group id="user-password-1" label="Password:" label-for="user-password-1">
+          <!-- <b-form-group id="user-password-1" label="Password:" label-for="user-password-1">
             <b-form-input
               id="user-password-1"
               required
@@ -53,7 +67,7 @@
               type="password"
               v-model="datas.password"
             ></b-form-input>
-          </b-form-group>
+          </b-form-group> -->
           <b-button type="submit" variant="primary">Submit</b-button>
         </b-form>
       </b-col>
@@ -62,10 +76,17 @@
 </template>
 
 <script>
+// import the component
+import Treeselect from '@riophae/vue-treeselect'
+// // import the styles
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 import userService from '../../services/user.service'
 import configService from '../../services/config.service'
+import orgStructureService from '../../services/orgstructure.service'
+import utils from '../../utils/utils'
 
 export default {
+  components: { Treeselect },
   mounted () {
     if (!this.currentUser) {
       this.$router.push('/login')
@@ -86,13 +107,13 @@ export default {
         user_fullname: '',
         user_nickname: '',
         user_type: '',
-        // org_structure_id: '',
+        org_structure_id: '',
         username: '',
-        password: '',
+        // password: '',
       },
       selectItems: {
         itemUserType: [{ text: 'Select One', value: null }],
-        // itemOrgStructureId: [],
+        itemsOrgStructureId: [{ text: 'Select One', value: null }],
       },
       breadcumbsItems: [
         {
@@ -141,13 +162,23 @@ export default {
       this.datas.user_fullname = res.data.user_fullname
       this.datas.user_nickname = res.data.user_nickname
       this.datas.user_type = res.data.user_type
+      this.datas.org_structure_id = res.data.org_structure_id
       this.datas.username = res.data.username
-      this.datas.password = res.data.password
+      // this.datas.password = res.data.password
     })
 
     const conditiondConfig = '?config_type=kesatuan'
     configService.getByCondition(conditiondConfig).then(res => {
       this.selectItems.itemUserType = res.data
+    })
+
+    orgStructureService.getAll().then(res => {
+      const datas = []
+      res.data.forEach(element => {
+        datas.push({ id: element.id, label: element.org_structure_name, parent_id: element.parent_id })
+      })
+      const treeDatas = utils.createTreeJsonObject(datas)
+      this.selectItems.itemsOrgStructureId = treeDatas
     })
   },
 }

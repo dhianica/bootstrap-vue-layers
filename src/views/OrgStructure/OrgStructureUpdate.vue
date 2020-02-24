@@ -4,54 +4,84 @@
       <b-col cols="12" md="12">
         <b-breadcrumb :items="breadcumbsItems"></b-breadcrumb>
         <b-form @submit="OnBtnSubmitClick" @submit.stop.prevent>
-          <b-form-group id="user-number-1" label="User Number:" label-for="user-number-1">
+          <b-form-group id="org-structure-parent-id-1" label="Parent Organization Structure :" label-for="org-structure-parent-id-1">
+            <treeselect
+              :options="selectItems.itemsParentId"
+              v-model="datas.parent_id"
+              :searchable="true"
+              :show-count="true"
+              :default-expand-level="1"
+              >
+              <label slot="option-label" slot-scope="{ node, shouldShowCount, count, labelClassName, countClassName }" :class="labelClassName">
+                {{ node.label }}
+                <span v-if="shouldShowCount" :class="countClassName">({{ count }})</span>
+              </label>
+            </treeselect>
+          </b-form-group>
+          <b-form-group id="org-structure-name-1" label="Organization Structure Name:" label-for="org-structure-name-1">
             <b-form-input
-              id="user-number-1"
-              v-model="datas.user_number"
+              id="org-structure-name-1"
+              v-model="datas.org_structure_name"
               required
-              placeholder="Enter number"
+              placeholder="Enter organization structure name"
             ></b-form-input>
           </b-form-group>
-          <b-form-group id="user-fullname-1" label="User Fullname:" label-for="user-fullname-1">
-            <b-form-input
-              id="user-fullname-1"
-              v-model="datas.user_fullname"
+          <b-form-group id="org-structure-description-1" label="Organization Structure Description:" label-for="org-structure-description-1">
+            <b-form-textarea
+              id="org-structure-description-1"
+              v-model="datas.org_structure_description"
               required
-              placeholder="Enter fullname"
-            ></b-form-input>
+              placeholder="Enter organization structure description"
+              rows="3"
+              max-rows="6"
+            ></b-form-textarea>
           </b-form-group>
-          <b-form-group id="user-nickname-1" label="User Nickname:" label-for="user-nickname-1">
-            <b-form-input
-              id="user-nickname-1"
-              v-model="datas.user_nickname"
-              required
-              placeholder="Enter nickname"
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group id="user-type-1" label="Type:" label-for="user-type-1">
+          <b-form-group id="org-structure-map-id-1" label="Map Id:" label-for="org-structure-map-id-1">
             <b-form-select
               id="user-type-1"
-              v-model="datas.user_type"
+              v-model="datas.map_id"
               required
             >
-              <option v-for="userType in selectItems.itemUserType" :key="userType.id" :value="userType.id">{{ userType.config_name }}</option>
+              <option v-for="MapId in selectItems.itemsMapId" :key="MapId.id" :value="MapId.id">{{ MapId.config_name }}</option>
             </b-form-select>
           </b-form-group>
-          <b-form-group id="user-name-1" label="Username:" label-for="user-name-1">
+          <b-form-group id="org-structure-res-1" label="Res 1:" label-for="org-structure-res-1">
             <b-form-input
-              id="user-name-1"
-              v-model="datas.username"
-              required
-              placeholder="Enter username"
+              id="org-structure-res-1"
+              v-model="datas.res_1"
+              placeholder="Enter res 1"
             ></b-form-input>
           </b-form-group>
-          <b-form-group id="user-password-1" label="Password:" label-for="user-password-1">
+
+          <b-form-group id="org-structure-res-2" label="Res 2:" label-for="org-structure-res-2">
             <b-form-input
-              id="user-password-1"
-              required
-              placeholder="Enter password"
-              type="password"
-              v-model="datas.password"
+              id="org-structure-res-2"
+              v-model="datas.res_2"
+              placeholder="Enter res 2"
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group id="org-structure-res-3" label="Res 3:" label-for="org-structure-res-3">
+            <b-form-input
+              id="org-structure-res-3"
+              v-model="datas.res_3"
+              placeholder="Enter res 3"
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group id="org-structure-res-4" label="Res 4:" label-for="org-structure-res-4">
+            <b-form-input
+              id="org-structure-res-4"
+              v-model="datas.res_4"
+              placeholder="Enter res 4"
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group id="org-structure-res-5" label="Res 5:" label-for="org-structure-res-5">
+            <b-form-input
+              id="org-structure-res-5"
+              v-model="datas.res_5"
+              placeholder="Enter res 5"
             ></b-form-input>
           </b-form-group>
           <b-button type="submit" variant="primary">Submit</b-button>
@@ -62,10 +92,16 @@
 </template>
 
 <script>
-import userService from '../../services/user.service'
-import configService from '../../services/config.service'
+// import the component
+import Treeselect from '@riophae/vue-treeselect'
+// // import the styles
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+import orgStructureService from '../../services/orgstructure.service'
+import configStructureService from '../../services/config.service'
+import utils from '../../utils/utils'
 
 export default {
+  components: { Treeselect },
   mounted () {
     if (!this.currentUser) {
       this.$router.push('/login')
@@ -82,17 +118,19 @@ export default {
   data () {
     return {
       datas: {
-        user_number: '',
-        user_fullname: '',
-        user_nickname: '',
-        user_type: '',
-        // org_structure_id: '',
-        username: '',
-        password: '',
+        parent_id: '',
+        org_structure_name: '',
+        org_structure_description: '',
+        map_id: '',
+        res_1: '',
+        res_2: '',
+        res_3: '',
+        res_4: '',
+        res_5: '',
       },
       selectItems: {
-        itemUserType: [{ text: 'Select One', value: null }],
-        // itemOrgStructureId: [],
+        itemsParentId: [],
+        itemsMapId: [],
       },
       breadcumbsItems: [
         {
@@ -100,8 +138,8 @@ export default {
           href: '#',
         },
         {
-          text: 'User',
-          to: '/user',
+          text: 'Organization Structure',
+          to: '/orgstructure',
         },
         {
           text: 'Update',
@@ -113,7 +151,7 @@ export default {
   methods: {
     OnBtnSubmitClick (evt) {
       evt.preventDefault()
-      userService.update(this.getId, this.datas).then(res => {
+      orgStructureService.update(this.getId, this.datas).then(res => {
         this.$bvToast.toast(`Berhasil memperbaharui data`, {
           title: 'Sukses',
           toaster: 'b-toaster-top-right',
@@ -121,8 +159,7 @@ export default {
           solid: true,
           appendToast: true,
         })
-
-        this.$router.push('/user')
+        this.$router.push('/orgstructure')
       }).catch(error => {
         this.$bvToast.toast(error.response.data.message.errors[0].message, {
           title: 'Gagal memperbaharui data',
@@ -136,18 +173,30 @@ export default {
 
   },
   created () {
-    userService.getById(this.getId).then(res => {
-      this.datas.user_number = res.data.user_number
-      this.datas.user_fullname = res.data.user_fullname
-      this.datas.user_nickname = res.data.user_nickname
-      this.datas.user_type = res.data.user_type
-      this.datas.username = res.data.username
-      this.datas.password = res.data.password
+    orgStructureService.getAll().then(res => {
+      const datas = []
+      res.data.forEach(element => {
+        datas.push({ id: element.id, label: element.org_structure_name, parent_id: element.parent_id })
+      })
+      const treeDatas = utils.createTreeJsonObject(datas)
+      this.selectItems.itemsParentId = treeDatas
     })
 
-    const conditiondConfig = '?config_type=kesatuan'
-    configService.getByCondition(conditiondConfig).then(res => {
-      this.selectItems.itemUserType = res.data
+    const conditionMapId = '?res_1=1'
+    configStructureService.getByCondition(conditionMapId).then(res => {
+      this.selectItems.itemsMapId = res.data
+    })
+
+    orgStructureService.getById(this.getId).then(res => {
+      this.datas.parent_id = res.data.parent_id
+      this.datas.org_structure_name = res.data.org_structure_name
+      this.datas.org_structure_description = res.data.org_structure_description
+      this.datas.map_id = res.data.map_id
+      this.datas.res_1 = res.data.res_1
+      this.datas.res_2 = res.data.res_2
+      this.datas.res_3 = res.data.res_3
+      this.datas.res_4 = res.data.res_4
+      this.datas.res_5 = res.data.res_5
     })
   },
 }

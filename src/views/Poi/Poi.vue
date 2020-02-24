@@ -3,6 +3,7 @@
     <b-row>
       <b-col cols="12" md="12">
         <b-breadcrumb :items="items"></b-breadcrumb>
+        <b-button variant="success" size="md">Add<b-icon-plus></b-icon-plus></b-button>
         <v-client-table ref="table"
           v-model="tableData"
           :columns="columns"
