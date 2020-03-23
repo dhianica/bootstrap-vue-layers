@@ -1,6 +1,8 @@
 <template>
-  <div id="app">
-    <b-navbar v-if="currentUser" toggleable="lg" type="dark" variant="dark">
+  <div id="app"
+  :class="[{'collapsed' : collapsed}]"
+  >
+    <!-- <b-navbar v-if="currentUser" toggleable="lg" type="dark" variant="dark">
 
       <a class="navbar-brand" href="#">
         <img src="./assets/logo.png" alt="" width="40px" height="80px">
@@ -11,7 +13,6 @@
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item v-b-toggle.collapse-6 size="sm" class="my-2 my-sm-0">List Data</b-nav-item>
-          <!-- <b-button v-b-toggle.collapse-6 size="sm" >List Data</b-button> -->
 
           <b-nav-item-dropdown text="Menu" right>
             <b-dropdown-item to="/dashboard">
@@ -93,14 +94,62 @@
           </b-card>
         </b-card>
       </b-collapse>
+    </div> -->
+    <div v-if="currentUser">
+      <sidebar-menu :menu="menu" @item-click="onItemClick" :collapsed="true" type="light">
+        <span slot="toggle-icon"><font-awesome-icon icon="arrows-alt-h" /></span>
+      </sidebar-menu>
     </div>
-      <router-view />
+    <router-view />
   </div>
 </template>
 
 <script>
 
 export default {
+  data () {
+    return {
+      menu: [
+        {
+          header: true,
+          title: 'Dashboard Polda',
+          hiddenOnCollapse: true,
+        },
+        {
+          href: '/dashboard',
+          title: 'Dashboard',
+          icon: 'fa fa-map',
+        },
+        {
+          href: '/config',
+          title: 'Configuration',
+          icon: 'fa fa-gear',
+        },
+        {
+          href: '/orgstructure',
+          title: 'Organization Structure',
+          icon: 'fa fa-users',
+        },
+        {
+          href: '/poi',
+          title: 'Poi',
+          icon: 'fa fa-map-marker',
+        },
+        {
+          href: '/user',
+          title: 'User',
+          icon: 'fa fa-user',
+        },
+        {
+          title: 'Logout',
+          icon: 'fa fa-sign-out',
+          class: 'btn-disabled',
+        },
+
+      ],
+      collapsed: true,
+    }
+  },
   computed: {
     currentUser () {
       return this.$store.state.auth.user
@@ -111,12 +160,54 @@ export default {
       this.$store.dispatch('auth/logout')
       this.$router.push('/login')
     },
+    onItemClick (event, item) {
+      if (item.title === 'Logout') {
+        this.$store.dispatch('auth/logout')
+        this.$router.push('/login')
+      }
+    },
   },
 }
 </script>
 
-<style scoped>
+<style>
+  .v-sidebar-menu {
+    background-color: #616161 !important;
+  }
+  .v-sidebar-menu .vsm--toggle-btn {
+    order: -1;
+  }
+  .v-sidebar-menu .vsm--item {
+    position: relative;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    padding: 10px 0px 10px 0px;
+  }
+  .v-sidebar-menu .vsm--link_level-1.vsm--link_exact-active, .v-sidebar-menu .vsm--link_level-1.vsm--link_active {
+    -webkit-box-shadow: 5px 0px 0px 0px #2D7D9A inset !important;
+    box-shadow: 5px 0px 0px 0px #2D7D9A inset !important;
+  }
 
+  .v-sidebar-menu .vsm--link_hover, .v-sidebar-menu .vsm--link:hover {
+    color: #fff !important;
+    background-color: #9E9E9E !important;
+}
+
+  .v-sidebar-menu.vsm_collapsed .vsm--link_level-1.vsm--link_hover .vsm--icon,
+  .v-sidebar-menu.vsm_collapsed .vsm--link_level-1:hover .vsm--icon {
+    background-color: #0099BC !important;
+  }
+  .v-sidebar-menu .vsm--link_level-1 .vsm--icon {
+      background-color: #4C4A48 !important;
+  }
+  .v-sidebar-menu .vsm--mobile-bg {
+    background-color: #2D7D9A !important;
+  }
+  .v-sidebar-menu .vsm--toggle-btn {
+    color: #fff !important;
+    background-color: #4C4A48 !important;
+  }
   .card-body {
     padding: 0.4rem;
   }

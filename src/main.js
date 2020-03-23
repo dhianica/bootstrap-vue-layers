@@ -1,16 +1,15 @@
 import Vue from 'vue'
-import App from './App.vue'
 // import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
 // import VueLayers modules
 import VueLayers from 'vuelayers'
 // import VueLayers styles
 import 'vuelayers/lib/style.css'
+import App from './App.vue'
 import 'vuejs-dialog/dist/vuejs-dialog.min.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import { BootstrapVue, BootstrapVueIcons, BTabs } from 'bootstrap-vue'
-import VueApexCharts from 'vue-apexcharts'
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import { router } from './router'
 import store from './store'
 import VeeValidate from 'vee-validate'
@@ -22,16 +21,19 @@ import {
   faUserPlus,
   faSignInAlt,
   faSignOutAlt,
+  faArrowsAltH,
+  faFilter,
+  faFileAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import { ClientTable } from 'vue-tables-2'
 import VuejsDialog from 'vuejs-dialog'
-
-// register all VueLayers components
-Vue.use(VueLayers, {})
+import VueSidebarMenu from 'vue-sidebar-menu'
+import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
+Vue.use(VueSidebarMenu)
 
 Vue.use(ClientTable)
 
-library.add(faHome, faUser, faUserPlus, faSignInAlt, faSignOutAlt)
+library.add(faHome, faUser, faUserPlus, faSignInAlt, faSignOutAlt, faArrowsAltH, faFilter, faFileAlt)
 
 Vue.config.productionTip = false
 
@@ -44,10 +46,8 @@ Vue.use('buefy', {
 
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
-Vue.component('b-tabs', BTabs)
-
-Vue.component('apexchart', VueApexCharts)
-
+// register all VueLayers components
+Vue.use(VueLayers)
 /* eslint-disable no-new */
 new Vue({
   router,
