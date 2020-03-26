@@ -3,20 +3,36 @@
     <b-row>
       <b-col cols="12" md="12">
         <b-breadcrumb :items="items"></b-breadcrumb>
-        <b-button variant="success" size="md">Add<b-icon-plus></b-icon-plus></b-button>
-        <v-client-table ref="table"
-          v-model="tableData"
-          :columns="columns"
-          :options="options">
-          <a slot="update" slot-scope="props" :href="props.row.id">
-            <b-button variant="success" size="sm"><b-icon-pencil></b-icon-pencil></b-button>
-          </a>
-          <a slot="delete" slot-scope="props" @click="OnDelete(props.row.id, props.index)">
-            <b-button variant="danger" size="sm">
-              <b-icon-trash></b-icon-trash>
-            </b-button>
-          </a>
-        </v-client-table>
+
+        <a @click="OnBtnAddClick()">
+          <b-button variant="success" size="md">Add<b-icon-plus></b-icon-plus></b-button>
+        </a>
+        <vue-ads-table
+            :columns="columns"
+            :rows="rows"
+            :classes="classes"
+            :filter="filter"
+            :page="page"
+            :selectable="selectable"
+            @filter-change="filterChanged"
+            @page-change="pageChanged"
+            @selection-change="selectionChanged"
+        >
+            <template
+                v-for="columnName in slottedColumns"
+                :slot="columnName"
+                slot-scope="props"
+            >
+            <a v-if="columnName == 'actionupdate'" @click="OnBtnUpdateClick(props.row.id)">
+              <b-button variant="success" size="sm"><b-icon-pencil></b-icon-pencil></b-button>
+            </a>
+            <a v-if="columnName == 'actiondelete'" @click="OnBtnDeleteClick(props.row.id)">
+              <b-button variant="danger" size="sm">
+                <b-icon-trash></b-icon-trash>
+              </b-button>
+            </a>
+            </template>
+        </vue-ads-table>
       </b-col>
     </b-row>
   </b-container>
@@ -24,8 +40,20 @@
 
 <script>
 import poiService from '../../services/poi.service'
+import '../../../node_modules/vue-ads-table-tree/dist/vue-ads-table-tree.css'
+import VueAdsTable from '../../components/TableContainer'
+import defaultClasses from '../../services/defaultClasses'
 
 export default {
+  props: {
+    classes: {
+      type: Object,
+      default: () => defaultClasses,
+    },
+  },
+  components: {
+    VueAdsTable,
+  },
   mounted () {
     if (!this.currentUser) {
       this.$router.push('/login')
@@ -38,25 +66,6 @@ export default {
   },
   data () {
     return {
-      columns: ['id', 'poi_name', 'poi_address', 'poi_lon', 'poi_lat', 'poi_type', 'poi_description', 'createdAt', 'updatedAt', 'update', 'delete'],
-      tableData: [],
-      options: {
-        headings: {
-          id: 'ID',
-          poi_name: 'Poi Name',
-          poi_address: 'Poi Address',
-          poi_lon: 'Poi Longitude',
-          poi_lat: 'Poi Latitude',
-          poi_type: 'Poi Type',
-          poi_description: 'Poi Description',
-          createdAt: 'Created Date',
-          updatedAt: 'Updated Date',
-          update: '',
-          delete: '',
-        },
-        sortable: ['id', 'poi_name'],
-        filterable: ['id', 'poi_name'],
-      },
       items: [
         {
           text: 'Data',
@@ -67,9 +76,81 @@ export default {
           active: true,
         },
       ],
+
+      page: 0,
+      filter: '',
+      slottedColumns: [
+        'actiondelete',
+        'actionupdate',
+      ],
+      selectable: true,
+      selectedRowIds: [],
+      columns: [
+        {
+          property: 'id',
+          title: 'ID',
+          direction: null,
+          filterable: true,
+          collapseIcon: true,
+        },
+        {
+          property: 'poi_name',
+          title: 'Poi Name',
+          direction: null,
+          filterable: true,
+        },
+        {
+          property: 'poi_address',
+          title: 'Poi Address',
+          direction: null,
+          filterable: true,
+        },
+        {
+          property: 'poi_lon',
+          title: 'Longitude',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'poi_lat',
+          title: 'Latitude',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'poi_type',
+          title: 'Poi Type',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'poi_description',
+          title: 'Poi Description',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'actionupdate',
+          title: '',
+        },
+        {
+          property: 'actiondelete',
+          title: '',
+        },
+      ],
+      rows: [],
     }
   },
   methods: {
+    filterChanged (filter) {
+      this.filter = filter
+    },
+    pageChanged (page) {
+      this.page = page
+    },
+    selectionChanged (selectedRows) {
+      this.selectedRowIds = selectedRows.map(row => row.id)
+    },
     OnDelete (id, index) {
       this.$dialog.confirm('Apa anda yakin ingin menghapus data ini?').then(function (dialog) {
         poiService.delete(id).then(res => {
@@ -80,48 +161,8 @@ export default {
   },
   created () {
     poiService.getAll().then(res => {
-      this.tableData = res.data
+      this.rows = res.data
     })
   },
 }
 </script>
-<style>
-.VuePagination {
-  text-align: center;
-}
-
-.vue-title {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.vue-pagination-ad {
-  text-align: center;
-}
-
-.glyphicon.glyphicon-eye-open {
-  width: 16px;
-  display: block;
-  margin: 0 auto;
-}
-
-th:nth-child(3) {
-  text-align: center;
-}
-
-.VueTables__child-row-toggler {
-  width: 16px;
-  height: 16px;
-  line-height: 16px;
-  display: block;
-  margin: auto;
-  text-align: center;
-}
-
-.VueTables__child-row-toggler--closed::before {
-  content: "+";
-}
-
-.VueTables__child-row-toggler--open::before {
-  content: "-";
-}

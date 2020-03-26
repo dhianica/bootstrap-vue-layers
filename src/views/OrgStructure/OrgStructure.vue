@@ -7,28 +7,54 @@
         <a @click="OnBtnAddClick()">
           <b-button variant="success" size="md">Add<b-icon-plus></b-icon-plus></b-button>
         </a>
-        <v-client-table ref="table"
-          v-model="tableData"
-          :columns="columns"
-          :options="options">
-          <a slot="update" slot-scope="props" @click="OnBtnUpdateClick(props.row.id)">
-            <b-button variant="success" size="sm"><b-icon-pencil></b-icon-pencil></b-button>
-          </a>
-          <a slot="delete" slot-scope="props" @click="OnBtnDeleteClick(props.row.id)">
-            <b-button variant="danger" size="sm">
-              <b-icon-trash></b-icon-trash>
-            </b-button>
-          </a>
-        </v-client-table>
+         <vue-ads-table
+            :columns="columns"
+            :rows="rows"
+            :classes="classes"
+            :filter="filter"
+            :page="page"
+            :selectable="selectable"
+            @filter-change="filterChanged"
+            @page-change="pageChanged"
+            @selection-change="selectionChanged"
+        >
+            <template
+                v-for="columnName in slottedColumns"
+                :slot="columnName"
+                slot-scope="props"
+            >
+            <a v-if="columnName == 'actionupdate'" @click="OnBtnUpdateClick(props.row.id)">
+              <b-button variant="success" size="sm"><b-icon-pencil></b-icon-pencil></b-button>
+            </a>
+            <a v-if="columnName == 'actiondelete'" @click="OnBtnDeleteClick(props.row.id)">
+              <b-button variant="danger" size="sm">
+                <b-icon-trash></b-icon-trash>
+              </b-button>
+            </a>
+            </template>
+        </vue-ads-table>
       </b-col>
     </b-row>
   </b-container>
 </template>
 
 <script>
+import '../../../node_modules/vue-ads-table-tree/dist/vue-ads-table-tree.css'
 import orgStructure from '../../services/orgstructure.service'
+import VueAdsTable from '../../components/TableContainer'
+import defaultClasses from '../../services/defaultClasses'
 
 export default {
+  name: 'OrgStructure',
+  props: {
+    classes: {
+      type: Object,
+      default: () => defaultClasses,
+    },
+  },
+  components: {
+    VueAdsTable,
+  },
   mounted () {
     if (!this.currentUser) {
       this.$router.push('/login')
@@ -41,28 +67,6 @@ export default {
   },
   data () {
     return {
-      columns: ['id', 'parent_id', 'org_structure_name', 'org_structure_description', 'map_id', 'res_1', 'res_2', 'res_3', 'res_4', 'res_5', 'createdAt', 'updatedAt', 'update', 'delete'],
-      tableData: [],
-      options: {
-        headings: {
-          id: 'ID',
-          parent_id: 'Parent ID',
-          org_structure_name: 'Org Structure Name',
-          org_structure_description: 'Org Structure Description',
-          map_id: 'Map ID',
-          res_1: 'Res 1',
-          res_2: 'Res 2',
-          res_3: 'Res 3',
-          res_4: 'Res 4',
-          res_5: 'Res 5',
-          createdAt: 'Created Date',
-          updatedAt: 'Updated Date',
-          update: '',
-          delete: '',
-        },
-        sortable: ['id', 'org_structure_name'],
-        filterable: ['id', 'org_structure_name'],
-      },
       items: [
         {
           text: 'Data',
@@ -73,9 +77,99 @@ export default {
           active: true,
         },
       ],
+      page: 0,
+      filter: '',
+      slottedColumns: [
+        'actiondelete',
+        'actionupdate',
+      ],
+      selectable: true,
+      selectedRowIds: [],
+      columns: [
+        {
+          property: 'id',
+          title: 'ID',
+          direction: null,
+          filterable: true,
+          collapseIcon: true,
+        },
+        {
+          property: 'parent_id',
+          title: 'Parent ID',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'org_structure_name',
+          title: 'Organization Structure Name',
+          direction: null,
+          filterable: true,
+        },
+        {
+          property: 'org_structure_description',
+          title: 'Organization Structure Description',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'map_id',
+          title: 'Map ID',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'res_1',
+          title: 'Res 1',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'res_2',
+          title: 'Res 2',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'res_3',
+          title: 'Res 3',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'res_4',
+          title: 'Res 4',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'res_5',
+          title: 'Res 5',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'actionupdate',
+          title: '',
+        },
+        {
+          property: 'actiondelete',
+          title: '',
+        },
+      ],
+      rows: [],
     }
   },
   methods: {
+    filterChanged (filter) {
+      this.filter = filter
+    },
+    pageChanged (page) {
+      this.page = page
+    },
+    selectionChanged (selectedRows) {
+      this.selectedRowIds = selectedRows.map(row => row.id)
+    },
+
     OnBtnAddClick () {
       this.$router.push({ name: 'orgstructureadd' })
     },
@@ -92,49 +186,10 @@ export default {
     },
   },
   created () {
-    orgStructure.getAll().then(res => {
-      this.tableData = res.data
+    const condition = '?isTree=1'
+    orgStructure.getByCondition(condition).then(res => {
+      this.rows = res.data
     })
   },
 }
 </script>
-<style>
-.VuePagination {
-  text-align: center;
-}
-
-.vue-title {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.vue-pagination-ad {
-  text-align: center;
-}
-
-.glyphicon.glyphicon-eye-open {
-  width: 16px;
-  display: block;
-  margin: 0 auto;
-}
-
-th:nth-child(3) {
-  text-align: center;
-}
-
-.VueTables__child-row-toggler {
-  width: 16px;
-  height: 16px;
-  line-height: 16px;
-  display: block;
-  margin: auto;
-  text-align: center;
-}
-
-.VueTables__child-row-toggler--closed::before {
-  content: "+";
-}
-
-.VueTables__child-row-toggler--open::before {
-  content: "-";
-}

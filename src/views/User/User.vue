@@ -7,19 +7,32 @@
         <a @click="OnBtnAddClick()">
           <b-button variant="success" size="md">Add<b-icon-plus></b-icon-plus></b-button>
         </a>
-        <v-client-table ref="table"
-          v-model="tableData"
-          :columns="columns"
-          :options="options">
-          <a slot="update" slot-scope="props" @click="OnBtnUpdateClick(props.row.id)">
-            <b-button variant="success" size="sm"><b-icon-pencil></b-icon-pencil></b-button>
-          </a>
-          <a slot="delete" slot-scope="props" @click="OnBtnDeleteClick(props.row.id)">
-            <b-button variant="danger" size="sm">
-              <b-icon-trash></b-icon-trash>
-            </b-button>
-          </a>
-        </v-client-table>
+        <vue-ads-table
+            :columns="columns"
+            :rows="rows"
+            :classes="classes"
+            :filter="filter"
+            :page="page"
+            :selectable="selectable"
+            @filter-change="filterChanged"
+            @page-change="pageChanged"
+            @selection-change="selectionChanged"
+        >
+            <template
+                v-for="columnName in slottedColumns"
+                :slot="columnName"
+                slot-scope="props"
+            >
+            <a v-if="columnName == 'actionupdate'" @click="OnBtnUpdateClick(props.row.id)">
+              <b-button variant="success" size="sm"><b-icon-pencil></b-icon-pencil></b-button>
+            </a>
+            <a v-if="columnName == 'actiondelete'" @click="OnBtnDeleteClick(props.row.id)">
+              <b-button variant="danger" size="sm">
+                <b-icon-trash></b-icon-trash>
+              </b-button>
+            </a>
+            </template>
+        </vue-ads-table>
       </b-col>
     </b-row>
   </b-container>
@@ -27,8 +40,20 @@
 
 <script>
 import userService from '../../services/user.service'
+import '../../../node_modules/vue-ads-table-tree/dist/vue-ads-table-tree.css'
+import VueAdsTable from '../../components/TableContainer'
+import defaultClasses from '../../services/defaultClasses'
 
 export default {
+  props: {
+    classes: {
+      type: Object,
+      default: () => defaultClasses,
+    },
+  },
+  components: {
+    VueAdsTable,
+  },
   mounted () {
     if (!this.currentUser) {
       this.$router.push('/login')
@@ -41,25 +66,6 @@ export default {
   },
   data () {
     return {
-      columns: ['id', 'user_number', 'user_fullname', 'user_nickname', 'user_type', 'org_structure_id', 'username', 'createdAt', 'updatedAt', 'update', 'delete'],
-      tableData: [],
-      options: {
-        headings: {
-          id: 'ID',
-          user_number: 'User Number',
-          user_fullname: 'User Fullname',
-          user_nickname: 'User Nickname',
-          user_type: 'User Type',
-          org_structure_id: 'Org Structure ID',
-          username: 'Username',
-          createdAt: 'Created Date',
-          updatedAt: 'Updated Date',
-          update: '',
-          delete: '',
-        },
-        sortable: ['id', 'user_number', 'user_fullname'],
-        filterable: ['id', 'user_number', 'user_fullname'],
-      },
       items: [
         {
           text: 'Data',
@@ -70,9 +76,80 @@ export default {
           active: true,
         },
       ],
+      page: 0,
+      filter: '',
+      slottedColumns: [
+        'actiondelete',
+        'actionupdate',
+      ],
+      selectable: true,
+      selectedRowIds: [],
+      columns: [
+        {
+          property: 'id',
+          title: 'ID',
+          direction: null,
+          filterable: true,
+          collapseIcon: true,
+        },
+        {
+          property: 'user_number',
+          title: 'User Number',
+          direction: null,
+          filterable: true,
+        },
+        {
+          property: 'user_fullname',
+          title: 'User Fullname',
+          direction: null,
+          filterable: true,
+        },
+        {
+          property: 'user_nickname',
+          title: 'User Nickname',
+          direction: null,
+          filterable: true,
+        },
+        {
+          property: 'user_type',
+          title: 'User Type',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'org_structure_id',
+          title: 'ID Organization Structure',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'username',
+          title: 'Username',
+          direction: null,
+          filterable: false,
+        },
+        {
+          property: 'actionupdate',
+          title: '',
+        },
+        {
+          property: 'actiondelete',
+          title: '',
+        },
+      ],
+      rows: [],
     }
   },
   methods: {
+    filterChanged (filter) {
+      this.filter = filter
+    },
+    pageChanged (page) {
+      this.page = page
+    },
+    selectionChanged (selectedRows) {
+      this.selectedRowIds = selectedRows.map(row => row.id)
+    },
     OnBtnAddClick () {
       this.$router.push({ name: 'useradd' })
     },
@@ -90,48 +167,8 @@ export default {
   },
   created () {
     userService.getAll().then(res => {
-      this.tableData = res.data
+      this.rows = res.data
     })
   },
 }
 </script>
-<style>
-.VuePagination {
-  text-align: center;
-}
-
-.vue-title {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.vue-pagination-ad {
-  text-align: center;
-}
-
-.glyphicon.glyphicon-eye-open {
-  width: 16px;
-  display: block;
-  margin: 0 auto;
-}
-
-th:nth-child(3) {
-  text-align: center;
-}
-
-.VueTables__child-row-toggler {
-  width: 16px;
-  height: 16px;
-  line-height: 16px;
-  display: block;
-  margin: auto;
-  text-align: center;
-}
-
-.VueTables__child-row-toggler--closed::before {
-  content: "+";
-}
-
-.VueTables__child-row-toggler--open::before {
-  content: "-";
-}

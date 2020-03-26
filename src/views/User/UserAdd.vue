@@ -43,9 +43,9 @@
               v-model="datas.org_structure_id"
               :searchable="true"
               :show-count="true"
-              :default-expand-level="1"
+              :normalizer="selectItems.normalizer"
               >
-              <label slot="option-label" slot-scope="{ node, shouldShowCount, count, labelClassName, countClassName }" :class="labelClassName">
+              <label slot="option-org_structure_name" slot-scope="{ node, shouldShowCount, count, labelClassName, countClassName }" :class="labelClassName">
                 {{ node.label }}
                 <span v-if="shouldShowCount" :class="countClassName">({{ count }})</span>
               </label>
@@ -85,7 +85,6 @@ import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 import userService from '../../services/user.service'
 import configService from '../../services/config.service'
 import orgStructureService from '../../services/orgstructure.service'
-import utils from '../../utils/utils'
 
 export default {
   components: { Treeselect },
@@ -106,13 +105,20 @@ export default {
         user_fullname: '',
         user_nickname: '',
         user_type: '',
-        org_structure_id: '',
+        org_structure_id: 0,
         username: '',
         password: '',
       },
       selectItems: {
         itemUserType: [{ text: 'Select One', value: null }],
-        itemsOrgStructureId: [{ text: 'Select One', value: null }],
+        itemsOrgStructureId: [],
+        normalizer (node) {
+          return {
+            id: node.id,
+            label: node.org_structure_name,
+            children: node._children,
+          }
+        },
       },
       breadcumbsItems: [
         {
@@ -159,13 +165,15 @@ export default {
       this.selectItems.itemUserType = res.data
     })
 
-    orgStructureService.getAll().then(res => {
-      const datas = []
-      res.data.forEach(element => {
-        datas.push({ id: element.id, label: element.org_structure_name, parent_id: element.parent_id })
-      })
-      const treeDatas = utils.createTreeJsonObject(datas)
-      this.selectItems.itemsOrgStructureId = treeDatas
+    const conditiondOrgStructure = '?isTree=1'
+    orgStructureService.getByCondition(conditiondOrgStructure).then(res => {
+      // let all = { id: 0, label: 'All' }
+      // this.selectItems.itemsOrgStructureId = Object.assign({}, all)
+      // let datas = { ...this.selectItems.itemsOrgStructureId }
+      // res.data.unshift(datas)
+      this.selectItems.itemsOrgStructureId = res.data
+      // this.selectItems.itemsOrgStructureId.unshift(datas)
+      // console.log(this.selectItems.itemsOrgStructureId)
     })
   },
 }

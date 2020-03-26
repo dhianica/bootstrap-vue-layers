@@ -164,15 +164,11 @@
       </b-card>
     </b-collapse>
 
-    <vl-map v-for="tabs in activeTabs" :key="tabs.data.id" :id="tabs.data.id" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+    <!-- <vl-map v-for="tabs in activeTabs" :key="tabs.data.id" :id="tabs.data.id" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
             data-projection="EPSG:4326">
-      <!-- map view aka ol.View -->
-
       <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
-      <!-- interactions -->
       <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
         <template slot-scope="select">
-          <!-- selected feature popup -->
           <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
                       :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
             <template>
@@ -182,18 +178,43 @@
               </b-card>
             </template>
           </vl-overlay>
-          <!--// selected popup -->
         </template>
       </vl-interaction-select>
-      <!--// interactions -->
 
       <vl-layer-tile>
         <vl-source-osm></vl-source-osm>
       </vl-layer-tile>
 
       <vl-layer-vector>
-        <!-- <vl-source-vector :features="features"></vl-source-vector> -->
         <vl-source-vector url="https://bitbucket.org/rifani/geojson-political-indonesia/raw/0e89dcb0b0454c5afffd414fd0cd0c25f1688d10/IDN_adm_1_province.json"></vl-source-vector>
+        <vl-style-func :factory="styleFuncProp" />
+      </vl-layer-vector>
+
+    </vl-map> -->
+
+    <vl-map class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
+            data-projection="EPSG:4326">
+      <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
+      <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
+        <template slot-scope="select">
+          <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
+                      :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
+            <template>
+              <b-card title="Data" :sub-title="feature.properties.name">
+                <b-table :items="items" :fields="fieldsItem">
+                </b-table>
+              </b-card>
+            </template>
+          </vl-overlay>
+        </template>
+      </vl-interaction-select>
+
+      <vl-layer-tile>
+        <vl-source-osm></vl-source-osm>
+      </vl-layer-tile>
+
+      <vl-layer-vector>
+        <vl-source-vector :features="features"></vl-source-vector>
         <vl-style-func :factory="styleFuncProp" />
       </vl-layer-vector>
 
@@ -234,6 +255,10 @@ export default {
     getCurrentMapId () {
       const user = JSON.parse(localStorage.getItem('user'))
       return user.data.map_id
+    },
+    getCurrentParentId () {
+      const user = JSON.parse(localStorage.getItem('user'))
+      return user.data.parent_id
     },
     activeTabs () {
       return this.tabsItem.filter(tab => {
@@ -306,9 +331,51 @@ export default {
       }
     },
     isActive (tabs) {
+      this.activeTabItem = tabs
       return this.activeItem === tabs.data.id
     },
+    loadFeatures (tabs) {
+      let conditionGetMapSpatial = null
+      if (this.getCurrentOrgStructureId === 0) {
+        if (tabs.res_2 === 0 || tabs.res_2 === '' || tabs.res_2 === null || tabs.res_2 === undefined) {
+          conditionGetMapSpatial = '?parent_id=0&res_1=' + tabs.res_1
+        } else {
+          conditionGetMapSpatial = '?res_1=' + tabs.res_1 + '&res_2=' + tabs.res_2
+        }
+      } else {
+        if (tabs.res_2 === 0 || tabs.res_2 === '' || tabs.res_2 === null || tabs.res_2 === undefined) {
+          conditionGetMapSpatial = '?map_id=' + this.getCurrentMapId + '&res_1=' + tabs.res_1
+        } else {
+          conditionGetMapSpatial = '?parent_id=' + this.getCurrentMapId + '&res_1=' + tabs.res_1 + '&res_2=' + tabs.res_2
+        }
+      }
+      return new Promise(resolve => {
+        mapService.getByCondition(conditionGetMapSpatial).then(res => {
+          if (res.data.length < 1) {
+            this.features = []
+          } else {
+            const datas = []
+            res.data.forEach(element => {
+              let feature = {
+                id: element.map_id,
+                type: 'Feature',
+                geometry: element.map_spatial,
+                properties: {
+                  name: element.org_structure_name,
+                },
+              }
+              datas.push(feature)
+            })
+            resolve(datas)
+          }
+        })
+      })
+    },
     setActive (tabs) {
+      this.loadFeatures(tabs.data).then(features => {
+        this.features = features.map(Object.freeze)
+      })
+
       this.activeItem = tabs.data.id
       tabs.data.isActive = true
       this.tabsItem.forEach(el => {
@@ -316,34 +383,8 @@ export default {
           el.data.isActive = false
         }
       })
-      // let conditionGetMapSpatial = null
-      // if (this.getCurrentOrgStructureId === 0) {
-      //   conditionGetMapSpatial = '?parent_id=0&res_1=' + tabs.data.res_1 + '&res_2=' + tabs.data.res_2
-      // } else {
-      //   conditionGetMapSpatial = '?parent_id=' + this.getCurrentMapId + '&res_1=' + tabs.data.res_1 + '&res_2=' + tabs.data.res_2
-      // }
-      // mapService.getByCondition(conditionGetMapSpatial).then(res => {
-      //   if (res.data.length < 1) {
-      //     this.features = []
-      //   } else {
-      //     const datas = []
-      //     res.data.forEach(element => {
-      //       let feature = {
-      //         type: 'Feature',
-      //         properties: {
-      //           id: element.map_id,
-      //           name: element.org_structure_name,
-      //           geometry: element.map_spatial,
-      //         },
-      //       }
-      //       datas.push(feature)
-      //     })
-      //     this.features = datas
-      //   }
-      // })
       return this.tabsItem
     },
-
   },
   data () {
     return {
@@ -369,7 +410,8 @@ export default {
       filters: {
         org_structure: '',
       },
-      // features: [],
+      features: [],
+      activeTabItem: null,
     }
   },
   created () {
@@ -394,10 +436,12 @@ export default {
 
     const conditionGetMap = '?res_1=1'
     configService.getByCondition(conditionGetMap).then(res => {
+      let element = null
       const datas = []
       let i = 0
       res.data.forEach(el => {
         if (i === 0) {
+          element = el
           this.activeItem = el.id
           el.isActive = true
         } else {
@@ -405,6 +449,10 @@ export default {
         }
         datas.push({ data: el })
         i++
+      })
+
+      this.loadFeatures(element).then(features => {
+        this.features = features.map(Object.freeze)
       })
       this.tabsItem = datas
     })
@@ -414,11 +462,23 @@ export default {
 
 <style scoped>
   a {
-    color: #2D7D9A !important;
+    color: #5D5A58 !important;
   }
-  .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+
+  .nav-pills {
       color: #fff !important;
-      background-color: #2D7D9A !important;
+      background-color: #e9ecef !important;
+      border: 1px;
+  }
+
+  .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+      color: #4C4A48 !important;
+      font-weight: 700;
+      background-color: transparent !important;
+  }
+
+  .nav-item {
+    border: 0.5px solid #4C4A48 !important;
   }
 
   .card-body {
@@ -428,7 +488,7 @@ export default {
     padding-left: 5rem !important;
   }
   .pl-7 {
-    padding-left: 7rem !important;
+    padding-left: 6rem !important;
   }
   .pl-8 {
     padding-left: 9rem !important;
@@ -589,11 +649,11 @@ export default {
 
   html, body, #app
     overflow:none
-    width: 99.5%
+    width: 99.4%
     height: 98.8%
     margin: 0
     padding: 0
-    margin-left: 11px
+    margin-left: 12px
 
   .vld-dashboard-app
     position: relative

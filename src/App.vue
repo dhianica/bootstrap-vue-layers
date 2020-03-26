@@ -143,7 +143,6 @@ export default {
         {
           title: 'Logout',
           icon: 'fa fa-sign-out',
-          class: 'btn-disabled',
         },
 
       ],
