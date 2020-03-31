@@ -7,6 +7,14 @@ class Utils {
       return map
     }, { i: {}, result: [] }).result
   }
+
+  mergeDataObject = (obj1, obj2) => {
+    var result = obj1.map(obj => {
+      let r = obj2.find(item => item.provinsi === obj.properties.name)
+      return Object.assign({}, { ...obj }, { properties: { ...obj.properties, ...r } })
+    })
+    return result
+  }
 }
 
 export default new Utils()

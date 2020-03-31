@@ -133,7 +133,7 @@ export default {
           solid: true,
           appendToast: true,
         })
-        this.$router.push('/conifg')
+        this.$router.push('/config')
       }).catch(error => {
         this.$bvToast.toast(error.response.data.message.errors[0].message, {
           title: 'Gagal menambah data',

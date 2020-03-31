@@ -57,6 +57,7 @@
                 id="org-structure-1"
                 v-model="filters.org_structure"
                 required
+                style="min-width:100px"
               >
                 <option v-for="OrgStructure in selectItems.itemsOrgStructure" :key="OrgStructure.id" :value="OrgStructure.id">{{ OrgStructure.org_structure_name }}</option>
               </b-form-select>
@@ -72,6 +73,7 @@
                 id="org-structure-detail-1"
                 v-model="filters.org_structure_detail"
                 required
+                style="min-width:100px"
               >
                 <option v-for="OrgStructureDetail in selectItems.itemsOrgStructureDetail" :key="OrgStructureDetail.id" :value="OrgStructureDetail.id">{{ OrgStructureDetail.org_structure_name }}</option>
               </b-form-select>
@@ -164,34 +166,6 @@
       </b-card>
     </b-collapse>
 
-    <!-- <vl-map v-for="tabs in activeTabs" :key="tabs.data.id" :id="tabs.data.id" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-            data-projection="EPSG:4326">
-      <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
-      <vl-interaction-select :features.sync="selectedFeatures" v-if="drawType == null">
-        <template slot-scope="select">
-          <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
-                      :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-            <template>
-              <b-card title="Data" :sub-title="feature.properties.name">
-                <b-table :items="items" :fields="fieldsItem">
-                </b-table>
-              </b-card>
-            </template>
-          </vl-overlay>
-        </template>
-      </vl-interaction-select>
-
-      <vl-layer-tile>
-        <vl-source-osm></vl-source-osm>
-      </vl-layer-tile>
-
-      <vl-layer-vector>
-        <vl-source-vector url="https://bitbucket.org/rifani/geojson-political-indonesia/raw/0e89dcb0b0454c5afffd414fd0cd0c25f1688d10/IDN_adm_1_province.json"></vl-source-vector>
-        <vl-style-func :factory="styleFuncProp" />
-      </vl-layer-vector>
-
-    </vl-map> -->
-
     <vl-map class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
             data-projection="EPSG:4326">
       <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
@@ -199,8 +173,17 @@
         <template slot-scope="select">
           <vl-overlay class="feature-popup" v-for="feature in select.features" :key="feature.id" :id="feature.id"
                       :position="pointOnSurface(feature.geometry)" :auto-pan="true" :auto-pan-animation="{ duration: 300 }">
-            <template>
+            <template v-if="isCorona">
               <b-card title="Data" :sub-title="feature.properties.name">
+                <span> Jumlah Positif : </span> {{ feature.properties.kasusPosi }} <br>
+                <span> Jumlah Sembuh   : </span> {{ feature.properties.kasusSemb }} <br>
+                <span> Jumlah Meninggal : </span> {{ feature.properties.kasusMeni }} <br>
+                <!-- <b-table :items="items" :fields="fieldsItem">
+                </b-table> -->
+              </b-card>
+            </template>
+            <template v-else>
+                <b-card title="Data" :sub-title="feature.properties.name">
                 <b-table :items="items" :fields="fieldsItem">
                 </b-table>
               </b-card>
@@ -209,14 +192,27 @@
         </template>
       </vl-interaction-select>
 
-      <vl-layer-tile>
+      <vl-layer-tile v-if="isCorona">
+        <vl-source-bingmaps v-bind="baseLayers"></vl-source-bingmaps>
+      </vl-layer-tile>
+      <vl-layer-tile v-else>
         <vl-source-osm></vl-source-osm>
       </vl-layer-tile>
 
       <vl-layer-vector>
-        <vl-source-vector :features="features"></vl-source-vector>
+        <vl-source-vector :features.sync="features">
+        </vl-source-vector>
         <vl-style-func :factory="styleFuncProp" />
+        <template slot-scope="feature">
+          <vl-overlay v-if="feature.geometry" :position="pointOnSurface(feature.geometry)" :offset="[10, 10]">
+            <p class="is-light box content">
+              Always opened overlay for Feature ID <strong>{{ feature.id }}</strong>
+            </p>
+          </vl-overlay>
+        </template>
       </vl-layer-vector>
+
+
 
     </vl-map>
   </div>
@@ -225,9 +221,14 @@
 <script>
 import { camelCase } from 'lodash'
 import { createProj, addProj, findPointOnSurface, createStyle } from 'vuelayers/lib/ol-ext'
+// import { Fill, Circle } from 'ol/style/'
 import orgStructureService from '../services/orgstructure.service'
 import configService from '../services/config.service'
 import mapService from '../services/map.service'
+import axios from 'axios'
+import utils from '../utils/utils'
+
+const apiCorona = 'https://indonesia-covid-19.mathdro.id/api/provinsi'
 
 let imageExtent = [10018754.172321, -1247452.3022878, 16280475.529441, 1257236.2405602]
 let customProj = createProj({
@@ -271,43 +272,83 @@ export default {
     pointOnSurface: findPointOnSurface,
     styleFuncProp () {
       const Colors = {}
-      Colors.names = {
-        darkgreen: '#006400',
-        darkolivegreen: '#556b2f',
-        darkorange: '#ff8c00',
-        green: '#008000',
-        maroon: '#800000',
-        orange: '#ffa500',
-        yellow: '#ffff00',
-      }
-
-      Colors.random = function () {
-        let result
-        let count = 0
-        for (let prop in this.names) {
-          if (Math.random() < 1 / ++count) {
-            result = prop
-          }
-        }
-        return { name: result, rgb: this.names[result] }
-      }
-
       return (feature, resolution) => {
         const isStyle = feature.getStyle()
         const isStyleFunction = feature.getStyleFunction()
         if (!isStyle && !isStyleFunction) {
-          let styles = [
-            createStyle({
-              // strokeColor: '#de9147',
-              strokeWidth: 0.8,
-              fillColor: Colors.random().rgb,
-              text: feature.getProperties().name,
-              font: '10px sans-serif',
-              scale: 2,
-            }),
-          ]
-          feature.setStyle(styles)
-          return styles
+          if (this.isCorona) {
+            Colors.names = {
+              darkgreen: '#006400',
+              darkolivegreen: '#556b2f',
+              darkorange: '#ff8c00',
+              green: '#008000',
+              maroon: '#800000',
+              orange: '#ffa500',
+              yellow: '#ffff00',
+            }
+
+            Colors.color = function () {
+              let result
+              if (feature.getProperties().kasusPosi > 100) {
+                result = this.names.maroon
+              } else if (feature.getProperties().kasusPosi <= 100 && feature.getProperties().kasusPosi > 80) {
+                result = this.names.darkorange
+              } else if (feature.getProperties().kasusPosi <= 80 && feature.getProperties().kasusPosi > 60) {
+                result = this.names.orange
+              } else if (feature.getProperties().kasusPosi <= 60 && feature.getProperties().kasusPosi > 40) {
+                result = this.names.yellow
+              } else if (feature.getProperties().kasusPosi <= 40 && feature.getProperties().kasusPosi > 20) {
+                result = this.names.darkgreen
+              } else if (feature.getProperties().kasusPosi <= 20) {
+                result = this.names.green
+              }
+              return { name: result }
+            }
+            let styles = [
+              createStyle({
+                imageRadius: (feature.getProperties().kasusPosi / 100) < 10 ? 15 : feature.getProperties().kasusPosi / 100,
+                strokeWidth: 0.8,
+                fillColor: Colors.color().name,
+                text: feature.getProperties().name,
+                font: '10px sans-serif',
+                scale: 2,
+              }),
+            ]
+            feature.setStyle(styles)
+            return styles
+          } else {
+            Colors.names = {
+              darkgreen: '#006400',
+              darkolivegreen: '#556b2f',
+              darkorange: '#ff8c00',
+              green: '#008000',
+              maroon: '#800000',
+              orange: '#ffa500',
+              yellow: '#ffff00',
+            }
+
+            Colors.random = function () {
+              let result
+              let count = 0
+              for (let prop in this.names) {
+                if (Math.random() < 1 / ++count) {
+                  result = prop
+                }
+              }
+              return { name: result, rgb: this.names[result] }
+            }
+            let styles = [
+              createStyle({
+                strokeWidth: 0.8,
+                fillColor: Colors.random().rgb,
+                text: feature.getProperties().name,
+                font: '10px sans-serif',
+                scale: 2,
+              }),
+            ]
+            feature.setStyle(styles)
+            return styles
+          }
         }
       }
     },
@@ -315,7 +356,8 @@ export default {
       if (this.filters.org_structure === 0) {
         this.IscurrentProvince = false
       } else {
-        const conditionGetParentOrgStructure = '?parent_id=' + this.getCurrentMapId
+        console.log(this.filters.org_structure)
+        const conditionGetParentOrgStructure = '?parent_id=' + this.filters.org_structure
         orgStructureService.getByCondition(conditionGetParentOrgStructure).then(res => {
           if (res.data.length < 1) {
             this.IscurrentProvince = false
@@ -323,7 +365,7 @@ export default {
             this.IscurrentProvince = true
             const datas = []
             res.data.forEach(element => {
-              datas.push({ id: element.id, org_structure_name: element.org_structure_name })
+              datas.push({ id: element.map_id, org_structure_name: element.org_structure_name })
             })
             this.selectItems.itemsOrgStructureDetail = datas
           }
@@ -338,7 +380,11 @@ export default {
       let conditionGetMapSpatial = null
       if (this.getCurrentOrgStructureId === 0) {
         if (tabs.res_2 === 0 || tabs.res_2 === '' || tabs.res_2 === null || tabs.res_2 === undefined) {
-          conditionGetMapSpatial = '?parent_id=0&res_1=' + tabs.res_1
+          if (tabs.res_3 === 1 || tabs.res_3 === '1') {
+            conditionGetMapSpatial = '?parent_id=0&res_1=' + tabs.res_1 + '&point=1'
+          } else {
+            conditionGetMapSpatial = '?parent_id=0&res_1=' + tabs.res_1
+          }
         } else {
           conditionGetMapSpatial = '?res_1=' + tabs.res_1 + '&res_2=' + tabs.res_2
         }
@@ -373,7 +419,20 @@ export default {
     },
     setActive (tabs) {
       this.loadFeatures(tabs.data).then(features => {
-        this.features = features.map(Object.freeze)
+        if (tabs.data.res_3 === 1 || tabs.data.res_3 === '1') {
+          this.isCorona = true
+          axios.get(apiCorona).then(res => {
+            if (res.data.length < 0) {
+              this.coronaDatas = []
+            } else {
+              this.coronaDatas = res.data.data
+              this.features = utils.mergeDataObject(features.map(Object.freeze), res.data.data)
+            }
+          })
+        } else {
+          this.isCorona = false
+          this.features = features.map(Object.freeze)
+        }
       })
 
       this.activeItem = tabs.data.id
@@ -388,6 +447,13 @@ export default {
   },
   data () {
     return {
+      baseLayers: {
+        name: 'bingmaps',
+        title: 'Bing Maps',
+        apiKey: 'ArbsA9NX-AZmebC6VyXAnDqjXk6mo2wGCmeYM8EwyDaxKfQhUYyk0jtx6hX5fpMn',
+        imagerySet: 'CanvasGray',
+        visible: true,
+      },
       mapVisible: '',
       activeItem: '',
       IscurrentProvince: false,
@@ -396,7 +462,7 @@ export default {
       rotation: 0,
       selectedFeatures: [],
       drawType: undefined,
-      fieldsItem: ['Nama', 'Tipe', 'Rating'],
+      fieldsItem: ['Tipe', 'Nama', 'Rating'],
       items: [
         { Tipe: 1, Nama: 'Dickerson', Rating: 5 },
         { Tipe: 1, Nama: 'Larsen', Rating: 4 },
@@ -412,6 +478,8 @@ export default {
       },
       features: [],
       activeTabItem: null,
+      coronaDatas: [],
+      isCorona: false,
     }
   },
   created () {
@@ -429,7 +497,7 @@ export default {
         },
       ]
       res.data.forEach(element => {
-        datas.push({ id: element.id, org_structure_name: element.org_structure_name })
+        datas.push({ id: element.map_id, org_structure_name: element.org_structure_name })
       })
       this.selectItems.itemsOrgStructure = datas
     })
@@ -452,7 +520,20 @@ export default {
       })
 
       this.loadFeatures(element).then(features => {
-        this.features = features.map(Object.freeze)
+        if (element.res_3 === 1 || element.res_3 === '1') {
+          this.isCorona = true
+          axios.get(apiCorona).then(res => {
+            if (res.data.length < 0) {
+              this.coronaDatas = []
+            } else {
+              this.coronaDatas = res.data.data
+              this.features = utils.mergeDataObject(features.map(Object.freeze), res.data.data)
+            }
+          })
+        } else {
+          this.isCorona = false
+          this.features = features.map(Object.freeze)
+        }
       })
       this.tabsItem = datas
     })
